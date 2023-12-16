@@ -16,11 +16,17 @@ class case:
             return False
     
     def getParamCase(self):
-        return self.contenu,self.x,self.y,self.couleur
+        return self.contenu,self.y,self.x,self.couleur
     
     def modifContenu(self,new):
         self.contenu = new
         
+    def couleurContenuDifferentVerif(self,couleur):
+        if self.contenu.couleur == couleur:
+            return False,self.contenu.couleur,self.contenu,self.y,self.x
+        else:
+            return True
+
 class pièce:
     '''class des pions, sera parent des classes pion, fou, cavalier, tour, reine, roi
     -position
@@ -54,7 +60,7 @@ class pion(pièce):
         else:
             return '♙'
 
-    def mouvement(self, xOr, yOr, xDest, yDest):
+    def mouvement(self, xOr, yOr, xDest, yDest): ###Ajouter vérification case vide
         if self.couleur == 'blanc':
             if self.aBoujé == False:
                 possibilités = [(self.x,self.y-1),(self.x,self.y-2)]
@@ -65,13 +71,13 @@ class pion(pièce):
                 possibilités = [(self.x,self.y+1),(self.x,self.y+2)]
             else:
                 possibilités = [(self.x,self.y+1)]
-
+        print(possibilités)
         try:
             assert (xDest,yDest) in possibilités, 'Mouvement impossible'
         except AssertionError as error:
             raise
         plateau1.plateau[yOr][xOr].modifContenu(None)
-        plateau1.plateau[yDest][xDest].modifContenu(pion(self.x,self.y-1,self.couleur,True))
+        plateau1.plateau[yDest][xDest].modifContenu(pion(yDest,xDest,self.couleur,True))
 
 
 class tour(pièce):
@@ -89,27 +95,41 @@ class tour(pièce):
         for i in range(8-yOr): #vérification vers le bas
             if plateau1.plateau[yOr+i][xOr].estVide() == True and 7 >= i >= 0:
                 possibilités.append((i+yOr,xOr))
+            elif plateau1.plateau[yOr+i][xOr].couleurContenuDifferentVerif(self.couleur)==True and 7 >= i >= 0:
+                possibilités.append((i+yOr,xOr))
+                break
             else:
                 break
         for i in range(8-xOr): #vérification vers la droite
             if plateau1.plateau[yOr][xOr+i].estVide() == True and 7 >= i >= 0:
                 possibilités.append((yOr,i+xOr))
+            elif plateau1.plateau[yOr][xOr+i].couleurContenuDifferentVerif(self.couleur)==True and 7 >= i >= 0:
+                possibilités.append((yOr,xOr+i))
+                break
             else:
                 break
         for i in range(yOr+1): #vérification vers la gauche
             if plateau1.plateau[yOr-i][xOr].estVide() == True and 7 >= i >= 0:
                 possibilités.append((yOr-i,xOr))
+            elif plateau1.plateau[yOr-i][xOr].couleurContenuDifferentVerif(self.couleur)==True and 7 >= i >= 0:
+                possibilités.append((i-yOr,xOr))
+                break
             else:
                 break
         for i in range(xOr+1): #vérification vers le haut
             if plateau1.plateau[yOr][xOr-i].estVide() == True and 7 >= i >= 0:
                 possibilités.append((yOr,xOr-i))
+            elif plateau1.plateau[yOr][xOr-i].couleurContenuDifferentVerif(self.couleur)==True and 7 >= i >= 0:
+                possibilités.append((yOr,xOr-i))
+                break
             else:
+                print(plateau1.plateau[yOr][xOr-i].couleurContenuDifferentVerif(self.couleur))
+                print(self.couleur, plateau1.plateau[yOr][xOr-i], yOr, xOr-i,i)
                 break
         try:
             assert (yDest,xDest) in possibilités, 'Mouvement impossible'
             plateau1.plateau[yOr][xOr].modifContenu(None)
-            plateau1.plateau[yDest][xDest].modifContenu(tour(self.x,self.y-1,self.couleur))
+            plateau1.plateau[yDest][xDest].modifContenu(tour(yDest,xDest,self.couleur))
         except AssertionError as error:
             print('Mouvement Impossible')
 class fou(pièce):
@@ -124,29 +144,25 @@ class fou(pièce):
 
     def mouvement(self, xOr, yOr, xDest, yDest):
         possibilités = []
-        for i in range(8-xOr if xOr<=yOr else 8-yOr): #vérification SE
-            if (plateau1.plateau[yOr+i][xOr+i].estVide() == True and 7 >= i >= 0) or (plateau1.plateau[yOr+i][xOr+i].getParamCase()[0] == None and 7 >= i >= 0) :
-                possibilités.append((yOr+i,xOr+i))
+        for i in range(8-xOr if 8-xOr>=8-yOr else 8-yOr): #vérification SE
+            if plateau1.plateau[yOr+i+1][xOr+i+1].estVide() == True and 7 >= i >= 0:
+                possibilités.append((yOr+i+1,xOr+i+1))
             else:
-                print('yes',plateau1.plateau[yOr+i][xOr+1].getParamCase()[0], i, yOr, xOr)
                 break
-        for i in range(xOr if xOr <= yOr else yOr): #vérification SO
-            if plateau1.plateau[yOr+i][xOr-i].estVide() == True and 7 >= i >= 0 or plateau1.plateau[yOr+i][xOr-i].getParamCase()[0] == None and 7 >= i >= 0 :
-                possibilités.append((yOr+i,xOr-i))
+        for i in range(yOr if yOr<=8-xOr else 8-xOr): #vérification NE
+            if plateau1.plateau[yOr-i-1][xOr+i+1].estVide() == True and 7 >= i >= 0:
+                possibilités.append((yOr-i-1,xOr+i+1))
             else:
-                print('yes 2')
-                break    
-        for i in range(yOr if yOr <= xOr else 8-xOr): #vérification NO
-            if plateau1.plateau[yOr-i][xOr-i].estVide() == True and 7 >= i >= 0:
-                possibilités.append((yOr-i,xOr-i))
-            else:
-                print('yes 3')
                 break
-        for i in range(yOr if yOr <= xOr else xOr):
-            if plateau1.plateau[yOr-i][xOr+i].estVide() == True and 7 >= i >= 0:
-                possibilités.append((yOr-i,xOr+i))
+        for i in range(xOr if xOr<=yOr else yOr):
+            if plateau1.plateau[yOr-i-1][xOr-i-1].estVide() == True and 7 >= i >= 0:
+                possibilités.append((yOr-i-1,xOr-i-1))
             else:
-                print('yes 4')
+                break
+        for i in range(xOr if xOr<=8-yOr else 8-yOr):
+            if plateau1.plateau[yOr+i+1][xOr-i-1].estVide() == True and 7 >= i >= 0:
+                possibilités.append((yOr+i+1,xOr-i-1))
+            else:
                 break
         print(possibilités)
         print(yDest,xDest)
@@ -224,13 +240,12 @@ class plateau:
         for i in range(8):
             print(self.affichage[i])
 
-    def getParam(self,x,y):
+    def getParam(self,y,x):
             assert self.plateau!=None
             return(self.plateau[y][x].getParamCase())
             
-    def changeContenu(self,x,y,type):
-        self.plateau[y][x].contenu = type
-
+    def changeContenu(self,y,x,type,couleur):
+        self.plateau[y][x].modifContenu(type(y,x,couleur))
 
 
 def demandeDeMouvement(xOr,yOr,xDest,yDest):
@@ -248,7 +263,7 @@ def demandeDeMouvement(xOr,yOr,xDest,yDest):
         yDest = 8-yDest
         try:
             assert plateau1.plateau[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
-            plateau1.getParam(xOr,yOr)[0].mouvement(xOr,yOr,xDest,yDest)
+            plateau1.getParam(yOr,xOr)[0].mouvement(xOr,yOr,xDest,yDest)
             plateau1.afficherPlateau()
             print(' ')
             demandeDeMouvement(input("Lettre correspondant à la coordonée x de la pièce : "),int(input("Chiffre correspondant à la coordonée y de la pièce : ")),input("Lettre correspondant à la coordonée x de la destination : "),int(input("Chiffre correspondant à la coordonée y de la destination : ")))
@@ -264,7 +279,7 @@ def demandeDeMouvement(xOr,yOr,xDest,yDest):
 
 
 plateau1 = plateau()
-plateau1.changeContenu(3,4,fou(3,4,'blanc'))
+plateau1.changeContenu(4,3,tour,'blanc')
 plateau1.afficherPlateau()
 print(' ')
 demandeDeMouvement(input("Lettre correspondant à la coordonée x de la pièce : "),int(input("Chiffre correspondant à la coordonée y de la pièce : ")),input("Lettre correspondant à la coordonée x de la destination : "),int(input("Chiffre correspondant à la coordonée y de la destination : ")))
