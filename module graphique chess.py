@@ -6,13 +6,17 @@ fenetrePrincipale = pygame.display.set_mode((960,540), pygame.RESIZABLE)
 def centrer(object):
     return fenetrePrincipale.get_size()[0]/2-object.get_size()[0]/2,fenetrePrincipale.get_size()[1]/2-object.get_size()[1]/2
 
+'''
 imagePlateau = pygame.image.load("img/plateau.png").convert()
 imagePlateauTaille = (fenetrePrincipale.get_size()[0]/1.2-(fenetrePrincipale.get_size()[0]/1.2/10),fenetrePrincipale.get_size()[0]/1.2-(fenetrePrincipale.get_size()[0]/1.2/10))
 imagePlateau = pygame.transform.scale(imagePlateau, imagePlateauTaille)
+'''
 
+'''
 imageShop = pygame.image.load("img/interface_shop.png").convert()
 imageShopTaille = (0,0)
 imageShop = pygame.transform.scale(imageShop, imageShopTaille)
+'''
 
 garderOuvert = True
 while garderOuvert == True:
