@@ -61,14 +61,20 @@ class pièce:
     def avoirCouleur(self):
         return self.couleur
     
-    def affichage(self):
+    def enleverImage(self):
+        pass
+
+    def affichage(self,groupe):
         pièces = [pion,tour,fou,cavalier,reine,roi]
+        self.sprite = pygame.sprite.Sprite()
         if self.couleur == "blanc":
-            self.image = pygame.transform.scale(imgsPiecesB[pièces.index(self.avoirType())], (int(imagePlateau.get_size()[0] / 10), int(imagePlateau.get_size()[0] / 10)))
+            self.sprite.image = pygame.transform.scale(imgsPiecesB[pièces.index(self.avoirType())], (int(imagePlateau.get_size()[0] / 10), int(imagePlateau.get_size()[0] / 10)))
         else:
-            self.image = pygame.transform.scale(imgsPiecesN[pièces.index(self.avoirType())], (int(imagePlateau.get_size()[0] / 10), int(imagePlateau.get_size()[0] / 10)))
-        position = centrer_piece(self.x,self.y,self.image)
-        fenetrePrincipale.blit(self.image, position)
+            self.sprite.image = pygame.transform.scale(imgsPiecesN[pièces.index(self.avoirType())], (int(imagePlateau.get_size()[0] / 10), int(imagePlateau.get_size()[0] / 10)))
+        position = centrer_piece(self.x,self.y,self.sprite.image)
+        self.sprite.rect = self.sprite.image.get_rect()
+        self.sprite.rect.topleft = (position[0],position[1])
+        groupe.add(self.sprite)
 
 def centrer_piece(x,y,imagePiece):
         decalage_x = (fenetrePrincipale.get_size()[0] - (imagePlateau.get_width()/10*8)) / 2
@@ -342,12 +348,15 @@ class plateau:
             self.grille[1][i].modifContenu(pion(i,1,'noir'))
             self.grille[6][i].modifContenu(pion(i,6,'blanc'))
 
+    def get_object(self,y,x):
+        return self.grille[int(y)][int(x)].getParamCase()[0]
+
     def get_case(self,mouseX,mouseY):
         decalage_x = (fenetrePrincipale.get_size()[0] - (imagePlateau.get_width()/10*8)) / 2
         decalage_y = (fenetrePrincipale.get_size()[1] - (imagePlateau.get_height()/10*8)) / 2
         posXforCase = mouseX-decalage_x
         posYforCase = mouseY-decalage_y
-        print(posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10))
+        return posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10)
 
  
 def effectuerMouvement(xOr,yOr,xDest,yDest,echec = False, joueur = 'blanc', coupPrécédentEffectué = True):
@@ -418,8 +427,12 @@ def lancer_jeu():
                     print('Fermeture de la fenetre')
                     garderOuvert = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                x,y = pygame.mouse.get_pos()
-                plateau1.get_case(x,y)
+                x,y = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
+                pieceABouger = plateau1.get_object(y,x)
+                print(pieceABouger)
+                pieceABouger.enleverImage()
+                
+
 
         #Placement des images de fond
         fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
@@ -428,11 +441,12 @@ def lancer_jeu():
         objetFutur = pygame.draw.rect(imageFondForet, "black",(0+imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,centrer(imageShop)[1],fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
         
         #Placement des images des pièces
+        spritesPiecesGroupe = pygame.sprite.Group()
         for ligne in plateau1.grille:
             for piece in ligne:
                 if piece.contenu!=None:
-                    piece.contenu.affichage()
-        
+                    piece.contenu.affichage(spritesPiecesGroupe)
+        spritesPiecesGroupe.draw(fenetrePrincipale)
         pygame.display.flip()
 
 plateau1 = plateau()
