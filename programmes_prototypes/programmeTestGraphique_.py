@@ -61,8 +61,9 @@ class pièce:
     def avoirCouleur(self):
         return self.couleur
     
-    def enleverImage(self):
-        pass
+    def enleverImage(self,groupe):
+        print('test')
+        groupe.remove(self.sprite)
 
     def affichage(self,groupe):
         pièces = [pion,tour,fou,cavalier,reine,roi]
@@ -420,6 +421,11 @@ def centrer(object):
 
 def lancer_jeu():
     garderOuvert = True
+    spritesPiecesGroupe = pygame.sprite.Group()
+    for ligne in plateau1.grille:
+        for piece in ligne:
+            if piece.contenu!=None:
+                piece.contenu.affichage(spritesPiecesGroupe)
     while garderOuvert == True:
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -430,7 +436,8 @@ def lancer_jeu():
                 x,y = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
                 pieceABouger = plateau1.get_object(y,x)
                 print(pieceABouger)
-                pieceABouger.enleverImage()
+                pieceABouger.enleverImage(spritesPiecesGroupe)
+                print(spritesPiecesGroupe,pieceABouger)
                 
 
 
@@ -441,12 +448,8 @@ def lancer_jeu():
         objetFutur = pygame.draw.rect(imageFondForet, "black",(0+imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,centrer(imageShop)[1],fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
         
         #Placement des images des pièces
-        spritesPiecesGroupe = pygame.sprite.Group()
-        for ligne in plateau1.grille:
-            for piece in ligne:
-                if piece.contenu!=None:
-                    piece.contenu.affichage(spritesPiecesGroupe)
         spritesPiecesGroupe.draw(fenetrePrincipale)
+        spritesPiecesGroupe.update()
         pygame.display.flip()
 
 plateau1 = plateau()
