@@ -50,6 +50,8 @@ class pièce:
             self.x = x
             self.y = y
             self.couleur = couleur
+            self.sprite = None
+
         except AssertionError as error:
             raise error
         except TypeError:
@@ -60,21 +62,25 @@ class pièce:
 
     def avoirCouleur(self):
         return self.couleur
-    
-    def enleverImage(self,groupe):
-        print('test')
-        groupe.remove(self.sprite)
+
+    def bougerImage(self,destX,destY,groupe):
+        #print(self.position,groupe,self,self.sprite) #sprite dans aucun groupe la 2ème fois
+        self.x = destX
+        self.y = destY
+        self.affichage(groupe)
 
     def affichage(self,groupe):
-        pièces = [pion,tour,fou,cavalier,reine,roi]
+        if self.sprite != None:
+            groupe.remove(self.sprite)
         self.sprite = pygame.sprite.Sprite()
+        pièces = [pion,tour,fou,cavalier,reine,roi]
         if self.couleur == "blanc":
             self.sprite.image = pygame.transform.scale(imgsPiecesB[pièces.index(self.avoirType())], (int(imagePlateau.get_size()[0] / 10), int(imagePlateau.get_size()[0] / 10)))
         else:
             self.sprite.image = pygame.transform.scale(imgsPiecesN[pièces.index(self.avoirType())], (int(imagePlateau.get_size()[0] / 10), int(imagePlateau.get_size()[0] / 10)))
-        position = centrer_piece(self.x,self.y,self.sprite.image)
         self.sprite.rect = self.sprite.image.get_rect()
-        self.sprite.rect.topleft = (position[0],position[1])
+        self.position = centrer_piece(self.x,self.y,self.sprite.image)
+        self.sprite.rect.topleft = (self.position[0],self.position[1])
         groupe.add(self.sprite)
 
 def centrer_piece(x,y,imagePiece):
@@ -93,20 +99,20 @@ class pion(pièce): #ajouter mouvement diagonale lors de couleur différente
     def mouvement(self, xOr, yOr): ###Ajouter vérification case vide
         possibilités = []
         if self.avoirCouleur() ==  'blanc' and yOr > 0:
-            if plateau1.plateau[yOr-1][xOr].estVide() == True:
+            if plateau1.grille[yOr-1][xOr].estVide() == True:
                 possibilités.append((yOr-1,xOr))
-                if plateau1.plateau[yOr-2][xOr].estVide() == True and self.aBoujé == False and yOr > 1:
+                if plateau1.grille[yOr-2][xOr].estVide() == True and self.aBoujé == False and yOr > 1:
                     possibilités.append((yOr-2,xOr))
             for i in [1,-1]:
-                if plateau1.plateau[yOr-1][xOr+i].estVide() == False and plateau1.plateau[yOr-1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
+                if plateau1.grille[yOr-1][xOr+i-1].estVide() == False and plateau1.grille[yOr-1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
                     possibilités.append((yOr-1,xOr+i))
         if self.avoirCouleur() == 'noir' and yOr < 7:
-            if plateau1.plateau[yOr+1][xOr].estVide() == True:
+            if plateau1.grille[yOr+1][xOr].estVide() == True:
                 possibilités.append((yOr+1,xOr))
-                if plateau1.plateau[yOr+2][xOr].estVide() == True and self.aBoujé == False and yOr > 6:
+                if plateau1.grille[yOr+2][xOr].estVide() == True and self.aBoujé == False and yOr > 6:
                     possibilités.append((yOr+2,xOr))
             for i in [1,-1]:
-                if plateau1.plateau[yOr+1][xOr+i].estVide() == False and plateau1.plateau[yOr+1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
+                if plateau1.grille[yOr+1][xOr+i].estVide() == False and plateau1.grille[yOr+1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
                     possibilités.append((yOr+1,xOr+i))
         return possibilités
         
@@ -127,32 +133,32 @@ class tour(pièce): #pièce marchant, ne plus toucher sauf pour ajout
     def mouvement(self, xOr, yOr):
         possibilités = []
         for i in range(7-yOr): #vérification vers le bas
-            if plateau1.plateau[yOr+i+1][xOr].estVide() == True:
+            if plateau1.grille[yOr+i+1][xOr].estVide() == True:
                 possibilités.append((i+yOr+1,xOr))
-            elif plateau1.plateau[yOr+i+1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr+i+1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((i+yOr+1,xOr))
                 break
             else:
                 break
         for i in range(7-xOr): #vérification vers la droite
-            if plateau1.plateau[yOr][xOr+i+1].estVide() == True:
+            if plateau1.grille[yOr][xOr+i+1].estVide() == True:
                 possibilités.append((yOr,i+xOr+1))
-            elif plateau1.plateau[yOr][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr,xOr+i+1))
             else:
                 break
         for i in range(yOr): #vérification vers la gauche
-            if plateau1.plateau[yOr-i-1][xOr].estVide() == True:
+            if plateau1.grille[yOr-i-1][xOr].estVide() == True:
                 possibilités.append((yOr-i-1,xOr))
-            elif plateau1.plateau[yOr-i-1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr-i-1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((i-yOr-1,xOr))
                 break
             else:
                 break
         for i in range(xOr): #vérification vers le haut
-            if plateau1.plateau[yOr][xOr-i-1].estVide() == True:
+            if plateau1.grille[yOr][xOr-i-1].estVide() == True:
                 possibilités.append((yOr,xOr-i-1))
-            elif plateau1.plateau[yOr][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr,xOr-i-1))
                 break
             else:
@@ -175,33 +181,33 @@ class fou(pièce): #pièce marchant, ne plus toucher sauf pour ajout
     def mouvement(self, xOr, yOr):
         possibilités = []
         for i in range(7-yOr if 7-yOr<7-xOr else 7-xOr): #vérification SE
-            if plateau1.plateau[yOr+i+1][xOr+i+1].estVide() == True:
+            if plateau1.grille[yOr+i+1][xOr+i+1].estVide() == True:
                 possibilités.append((yOr+i+1,xOr+i+1))
-            elif plateau1.plateau[yOr+i+1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr+i+1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((i+yOr+1,xOr+i+1))
                 break
             else:
                 break
         for i in range(yOr if yOr<7-xOr else 7-xOr): #vérification NE
-            if plateau1.plateau[yOr-i-1][xOr+i+1].estVide() == True:
+            if plateau1.grille[yOr-i-1][xOr+i+1].estVide() == True:
                 possibilités.append((yOr-i-1,xOr+i+1))
-            elif plateau1.plateau[yOr-i-1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr-i-1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr-1-i,xOr+i+1))
                 break
             else:
                 break
         for i in range(xOr if xOr<=yOr else yOr): #vérification NO
-            if plateau1.plateau[yOr-i-1][xOr-i-1].estVide() == True:
+            if plateau1.grille[yOr-i-1][xOr-i-1].estVide() == True:
                 possibilités.append((yOr-i-1,xOr-i-1))
-            elif plateau1.plateau[yOr-i-1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr-i-1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr-i-1,xOr-i-1))
                 break
             else:
                 break
         for i in range(xOr if xOr<=7-yOr else 7-yOr): #vérification SO
-            if plateau1.plateau[yOr+i+1][xOr-i-1].estVide() == True:
+            if plateau1.grille[yOr+i+1][xOr-i-1].estVide() == True:
                 possibilités.append((yOr+i+1,xOr-i-1))
-            elif plateau1.plateau[yOr+i+1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr+i+1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr+i+1,xOr-i-1))
                 break
             else:
@@ -226,7 +232,7 @@ class cavalier(pièce): #pièce marchant, ne plus toucher sauf pour ajout
         mouvements = [(-1,-2),(-1,2),(-2,1),(2,1),(1,2),(1,-2),(2,-1),(-2,-1)]
         for i in mouvements: #vérification SE
             if 7>= yOr+i[0] >= 0 and 7>= xOr+i[1] >= 0:
-                if plateau1.plateau[yOr+i[0]][xOr+i[1]].estVide() == True or plateau1.plateau[yOr+i[0]][xOr+i[1]].couleurContenuDifferentVerif(self.couleur)==True:
+                if plateau1.grille[yOr+i[0]][xOr+i[1]].estVide() == True or plateau1.grille[yOr+i[0]][xOr+i[1]].couleurContenuDifferentVerif(self.couleur)==True:
                     possibilités.append((yOr+i[0],xOr+i[1]))
         return possibilités
 
@@ -246,64 +252,64 @@ class reine(pièce): #pièce marchant, ne plus toucher sauf pour ajout
     def mouvement(self, xOr, yOr): #possible d'optimiser largement
         possibilités = []
         for i in range(7-yOr if 7-yOr<7-xOr else 7-xOr): #vérification SE
-            if plateau1.plateau[yOr+i+1][xOr+i+1].estVide() == True:
+            if plateau1.grille[yOr+i+1][xOr+i+1].estVide() == True:
                 possibilités.append((yOr+i+1,xOr+i+1))
-            elif plateau1.plateau[yOr+i+1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr+i+1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((i+yOr+1,xOr+i+1))
                 break
             else:
                 break
         for i in range(yOr if yOr<7-xOr else 7-xOr): #vérification NE
-            if plateau1.plateau[yOr-i-1][xOr+i+1].estVide() == True:
+            if plateau1.grille[yOr-i-1][xOr+i+1].estVide() == True:
                 possibilités.append((yOr-i-1,xOr+i+1))
-            elif plateau1.plateau[yOr-i-1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr-i-1][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr-1-i,xOr+i+1))
                 break
             else:
                 break
         for i in range(xOr if xOr<=yOr else yOr): #vérification NO
-            if plateau1.plateau[yOr-i-1][xOr-i-1].estVide() == True:
+            if plateau1.grille[yOr-i-1][xOr-i-1].estVide() == True:
                 possibilités.append((yOr-i-1,xOr-i-1))
-            elif plateau1.plateau[yOr-i-1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr-i-1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr-i-1,xOr-i-1))
                 break
             else:
                 break
         for i in range(xOr if xOr<=7-yOr else 7-yOr): #vérification SO
-            if plateau1.plateau[yOr+i+1][xOr-i-1].estVide() == True:
+            if plateau1.grille[yOr+i+1][xOr-i-1].estVide() == True:
                 possibilités.append((yOr+i+1,xOr-i-1))
-            elif plateau1.plateau[yOr+i+1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr+i+1][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr+i+1,xOr-i-1))
                 break
             else:
                 break
         for i in range(7-yOr): #vérification vers le bas
-            if plateau1.plateau[yOr+i+1][xOr].estVide() == True:
+            if plateau1.grille[yOr+i+1][xOr].estVide() == True:
                 possibilités.append((i+yOr+1,xOr))
-            elif plateau1.plateau[yOr+i+1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr+i+1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((i+yOr+1,xOr))
                 break
             else:
                 break
         for i in range(7-xOr): #vérification vers la droite
-            if plateau1.plateau[yOr][xOr+i+1].estVide() == True:
+            if plateau1.grille[yOr][xOr+i+1].estVide() == True:
                 possibilités.append((yOr,i+xOr+1))
-            elif plateau1.plateau[yOr][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr][xOr+i+1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr,xOr+i+1))
             else:
                 break
         for i in range(yOr): #vérification vers la gauche
-            if plateau1.plateau[yOr-i-1][xOr].estVide() == True:
+            if plateau1.grille[yOr-i-1][xOr].estVide() == True:
                 possibilités.append((yOr-i-1,xOr))
-            elif plateau1.plateau[yOr-i-1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr-i-1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((i-yOr-1,xOr))
                 break
             else:
                 break
         for i in range(xOr): #vérification vers le haut
-            if plateau1.plateau[yOr][xOr-i-1].estVide() == True:
+            if plateau1.grille[yOr][xOr-i-1].estVide() == True:
                 possibilités.append((yOr,xOr-i-1))
-            elif plateau1.plateau[yOr][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
+            elif plateau1.grille[yOr][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
                 possibilités.append((yOr,xOr-i-1))
                 break
             else:
@@ -328,7 +334,7 @@ class roi(pièce): #pièce marchant, ne plus toucher sauf pour ajout
         mouvements = [(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
         for i in mouvements: #vérification SE
             if 7>= yOr+i[0] >= 0 and 7>= xOr+i[1] >= 0:
-                if plateau1.plateau[yOr+i[0]][xOr+i[1]].estVide() == True or plateau1.plateau[yOr+i[0]][xOr+i[1]].couleurContenuDifferentVerif(self.couleur)==True:
+                if plateau1.grille[yOr+i[0]][xOr+i[1]].estVide() == True or plateau1.grille[yOr+i[0]][xOr+i[1]].couleurContenuDifferentVerif(self.couleur)==True:
                     possibilités.append((yOr+i[0],xOr+i[1]))
         return possibilités
 
@@ -360,61 +366,42 @@ class plateau:
         return posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10)
 
  
-def effectuerMouvement(xOr,yOr,xDest,yDest,echec = False, joueur = 'blanc', coupPrécédentEffectué = True):
-    '''Transfome le format d'échec normal (case en bas à droite = a1) en format prog (case en bas à droite = (y=7, x=0))
-       Puis envoie requète de mouvement à l'objet correspondant
-    '''
-    print(' ')
-    xPlateau = ['a','b','c','d','e','f','g','h']
-    yPlateau = [i for i in range(1,9)]
+def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',echec = False, coupPrécédentEffectué = True):
+    xOr,yOr = piece.avoirPosition()
     try:
-        assert xOr in xPlateau and xDest in xPlateau, 'Coordonnées x invalides'
-        assert yOr in yPlateau and yDest in yPlateau, 'Coordonnées y invalides'
-        xOr = xPlateau.index(xOr)
-        xDest = xPlateau.index(xDest)
-        yOr = 8-yOr
-        yDest = 8-yDest
+        assert plateau1.grille[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
+        assert plateau1.grille[yOr][xOr].couleurContenuDifferentVerif(joueur) == False, "Vous ne pouvez pas jouer une pièce qui ne vous appartient pas"
+        piece = plateau1.get_object(yOr,xOr)
+        possibilités = piece.mouvement(xOr,yOr)
         try:
-            assert plateau1.plateau[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
-            assert plateau1.plateau[yOr][xOr].couleurContenuDifferentVerif(joueur) == False, "Vous ne pouvez pas jouer une pièce qui ne vous appartient pas"
-            pièceParam = plateau1.getParam(yOr,xOr)
-            possibilités = pièceParam[0].mouvement(xOr,yOr)
-            try:
-                print(yDest,xDest, possibilités)
-                assert (yDest,xDest) in possibilités, 'Mouvement impossible'
-                plateau1.plateau[yOr][xOr].modifContenu(None)
-                if pièceParam[0].avoirType() != pion:
-                    plateau1.plateau[yDest][xDest].modifContenu(pièceParam[0].avoirType()(xDest,yDest,pièceParam[0].avoirCouleur()))
-                else : 
-                    plateau1.plateau[yDest][xDest].modifContenu(pièceParam[0].avoirType()(xDest,yDest,pièceParam[0].avoirCouleur(),True))
-                #test pour echecs :
-                echecParam = plateau1.getParam(yDest,xDest)
-                possibilités = echecParam[0].mouvement(xDest,yDest)
-                for piece in possibilités:
-                    pieceParam = plateau1.getParam(piece[0],piece[1])
-                    if pieceParam[0] != None:
-                        if pieceParam[0].avoirType() == roi:
-                            if pieceParam[0].avoirCouleur() != plateau1.getParam(yDest,xDest)[0].avoirCouleur():
-                                print("echec")
-                                echec = True
-                                mouvementsRoi = pieceParam[0].mouvement(pieceParam[3],pieceParam[2])
-                                print(mouvementsRoi) #a finir (mat)
-            except AssertionError as error:
-                print(error)
-                coupPrécédentEffectué = False
+            assert (yDest,xDest) in possibilités, 'Mouvement impossible'
+            if piece.avoirType() != pion:
+                plateau1.grille[yDest][xDest].modifContenu(plateau1.grille[yOr][xOr].contenu)
+            else :
+                plateau1.grille[yDest][xDest].modifContenu(plateau1.grille[yOr][xOr].contenu)
+                plateau1.grille[yDest][xDest].contenu.aBoujé = True
+            plateau1.grille[yOr][xOr].modifContenu(None)
+            piece.bougerImage(xDest,yDest,groupe)
+            #test pour echecs :
+            possibilités = plateau1.get_object(yDest,xDest).mouvement(xDest,yDest)
+            for piece in possibilités:
+                pieceParam = plateau1.get_object(piece[0],piece[1])
+                if pieceParam != None:
+                    if pieceParam.avoirType() == roi:
+                        if pieceParam.avoirCouleur() != plateau1.get_object(yDest,xDest).avoirCouleur(): # fonctionalité de la condition a tester 
+                            print("echec")
+                            echec = True
         except AssertionError as error:
-            print(error)    
-            coupPrécédentEffectué = False     
+            print(error)
+            coupPrécédentEffectué = False
     except AssertionError as error:
-        print(error)
+        print(error) 
         coupPrécédentEffectué = False
     finally:
-        plateau1.afficherPlateau()
-        print(f'Coup précédent éffectué : {coupPrécédentEffectué}')
+        #print(f'Coup précédent éffectué : {coupPrécédentEffectué}')
         if coupPrécédentEffectué == True:
             joueur = "blanc" if joueur == "noir" else "noir"
-        print(f"C'est le tour des {joueur}s")
-        effectuerMouvement(input("Lettre correspondant à la coordonée x de la pièce : "),int(input("Chiffre correspondant à la coordonée y de la pièce : ")),input("Lettre correspondant à la coordonée x de la destination : "),int(input("Chiffre correspondant à la coordonée y de la destination : ")), echec, joueur)
+        return joueur,coupPrécédentEffectué
 
 def centrer(object):
     return fenetrePrincipale.get_size()[0]/2-object.get_size()[0]/2,fenetrePrincipale.get_size()[1]/2-object.get_size()[1]/2
@@ -422,6 +409,8 @@ def centrer(object):
 def lancer_jeu():
     garderOuvert = True
     spritesPiecesGroupe = pygame.sprite.Group()
+    joueur = 'blanc'
+    print(f" \nC'est le tour des {joueur}s")
     for ligne in plateau1.grille:
         for piece in ligne:
             if piece.contenu!=None:
@@ -430,14 +419,21 @@ def lancer_jeu():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    print('Fermeture de la fenetre')
                     garderOuvert = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                x,y = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
-                pieceABouger = plateau1.get_object(y,x)
-                print(pieceABouger)
-                pieceABouger.enleverImage(spritesPiecesGroupe)
-                print(spritesPiecesGroupe,pieceABouger)
+                if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
+                    xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
+                    pieceABouger = plateau1.get_object(yOr,xOr)
+                    if pieceABouger != None and pieceABouger.avoirCouleur() == joueur:
+                        deuxiemeClic = False
+                        while deuxiemeClic == False:
+                            if pygame.event.wait().type == pygame.MOUSEBUTTONDOWN:
+                                deuxiemeClic = True
+                                xDest,yDest = plateau1.get_case(int(pygame.mouse.get_pos()[0]),pygame.mouse.get_pos()[1])
+                                xDest,yDest = int(xDest),int(yDest)
+                        joueur,coupEffectué = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,joueur)
+                        if coupEffectué == True:
+                            print(f" \nC'est le tour des {joueur}s")
                 
 
 
