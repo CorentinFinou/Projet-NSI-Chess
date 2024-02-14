@@ -344,8 +344,10 @@ class plateau:
 
     def get_case(self,mouseX,mouseY):
         decalage_x = (fenetrePrincipale.get_size()[0] - (imagePlateau.get_width()/10*8)) / 2
-        decalage_y = (fenetrePrincipale.get_size()[1] - imagePlateau.get_height()/10*8) / 2
-        return decalage_x + imagePiece.get_width()*x,decalage_y+imagePiece.get_height()*(y)
+        decalage_y = (fenetrePrincipale.get_size()[1] - (imagePlateau.get_height()/10*8)) / 2
+        posXforCase = mouseX-decalage_x
+        posYforCase = mouseY-decalage_y
+        print(posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10))
 
  
 def effectuerMouvement(xOr,yOr,xDest,yDest,echec = False, joueur = 'blanc', coupPrécédentEffectué = True):
