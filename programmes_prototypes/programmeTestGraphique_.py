@@ -384,6 +384,7 @@ def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, c
             plateau1.grille[yOr][xOr].modifContenu(None)
             piece.bougerImage(xDest,yDest,groupe)
             #test pour mat :
+            groupe.remove(pieceMangée.sprite)
             if pieceMangée.avoirType() == roi:
                 mat = True
                 print(f'Partie terminée ! Les {joueur}s ont gagné !')
