@@ -36,7 +36,6 @@ class case:
             else:
                 return True
         except AttributeError:
-            print(self.contenu,self.y,self.x)
             return False
 
 class pièce:
@@ -98,23 +97,26 @@ class pion(pièce): #ajouter mouvement diagonale lors de couleur différente
 
     def mouvement(self, xOr, yOr): ###Ajouter vérification case vide
         possibilités = []
+        if 0<xOr<7:
+            diagTest = [1,-1]
+        elif 0<xOr:
+            diagTest = [-1]
+        else:
+            diagTest = [1]
         if self.avoirCouleur() ==  'blanc' and yOr > 0:
             if plateau1.grille[yOr-1][xOr].estVide() == True:
                 possibilités.append((yOr-1,xOr))
                 if plateau1.grille[yOr-2][xOr].estVide() == True and self.aBoujé == False and yOr > 1:
                     possibilités.append((yOr-2,xOr))
-            for i in [1,-1]:
+            for i in diagTest:
                 if plateau1.grille[yOr-1][xOr+i].estVide() == False and plateau1.grille[yOr-1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
-                    print('test')
                     possibilités.append((yOr-1,xOr+i))
-                    print('mouvAjouté')
         if self.avoirCouleur() == 'noir' and yOr < 7:
             if plateau1.grille[yOr+1][xOr].estVide() == True:
                 possibilités.append((yOr+1,xOr))
                 if plateau1.grille[yOr+2][xOr].estVide() == True and self.aBoujé == False and yOr < 6:
                     possibilités.append((yOr+2,xOr))
-                    print('oui')
-            for i in [1,-1]:
+            for i in diagTest:
                 if plateau1.grille[yOr+1][xOr+i].estVide() == False and plateau1.grille[yOr+1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
                     possibilités.append((yOr+1,xOr+i))
         return possibilités
@@ -149,15 +151,15 @@ class tour(pièce): #pièce marchant, ne plus toucher sauf pour ajout
                 possibilités.append((yOr,xOr+i+1))
             else:
                 break
-        for i in range(yOr): #vérification vers la gauche
+        for i in range(yOr): #vérification vers le haut
             if plateau1.grille[yOr-i-1][xOr].estVide() == True:
                 possibilités.append((yOr-i-1,xOr))
             elif plateau1.grille[yOr-i-1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
-                possibilités.append((i-yOr-1,xOr))
+                possibilités.append((yOr-i-1,xOr))
                 break
             else:
                 break
-        for i in range(xOr): #vérification vers le haut
+        for i in range(xOr): #vérification vers la gauche
             if plateau1.grille[yOr][xOr-i-1].estVide() == True:
                 possibilités.append((yOr,xOr-i-1))
             elif plateau1.grille[yOr][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
@@ -300,15 +302,15 @@ class reine(pièce): #pièce marchant, ne plus toucher sauf pour ajout
                 possibilités.append((yOr,xOr+i+1))
             else:
                 break
-        for i in range(yOr): #vérification vers la gauche
+        for i in range(yOr): #vérification vers le haut
             if plateau1.grille[yOr-i-1][xOr].estVide() == True:
                 possibilités.append((yOr-i-1,xOr))
             elif plateau1.grille[yOr-i-1][xOr].couleurContenuDifferentVerif(self.couleur)==True:
-                possibilités.append((i-yOr-1,xOr))
+                possibilités.append((yOr-i-1,xOr))
                 break
             else:
                 break
-        for i in range(xOr): #vérification vers le haut
+        for i in range(xOr): #vérification vers la gauche
             if plateau1.grille[yOr][xOr-i-1].estVide() == True:
                 possibilités.append((yOr,xOr-i-1))
             elif plateau1.grille[yOr][xOr-i-1].couleurContenuDifferentVerif(self.couleur)==True:
@@ -411,7 +413,7 @@ def lancer_jeu(mat = False):
     garderOuvert = True
     spritesPiecesGroupe = pygame.sprite.Group()
     joueur = 'blanc'
-    print(f" \nC'est le tour des {joueur}s")
+    #print(f" \nC'est le tour des {joueur}s")
     for ligne in plateau1.grille:
         for piece in ligne:
             if piece.contenu!=None:
@@ -434,7 +436,8 @@ def lancer_jeu(mat = False):
                                 xDest,yDest = int(xDest),int(yDest)
                         joueur,coupEffectué,mat = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,joueur,mat)
                         if coupEffectué == True and mat == False:
-                            print(f" \nC'est le tour des {joueur}s")
+                            pass
+                            #print(f" \nC'est le tour des {joueur}s")
                 
         if mat == True:
             garderOuvert = False
