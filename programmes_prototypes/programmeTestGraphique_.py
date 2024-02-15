@@ -384,7 +384,9 @@ def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, c
             plateau1.grille[yOr][xOr].modifContenu(None)
             piece.bougerImage(xDest,yDest,groupe)
             #test pour mat :
-            print(pieceMangée)
+            if pieceMangée.avoirType() == roi:
+                mat = True
+                print(f'Partie terminée ! Les {joueur}s ont gagné !')
             
         except AssertionError as error:
             print(error)
@@ -395,14 +397,14 @@ def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, c
         coupPrécédentEffectué = False
     finally:
         #print(f'Coup précédent éffectué : {coupPrécédentEffectué}')
-        if coupPrécédentEffectué == True:
+        if coupPrécédentEffectué == True :
             joueur = "blanc" if joueur == "noir" else "noir"
-        return joueur,coupPrécédentEffectué
+        return joueur,coupPrécédentEffectué,mat
 
 def centrer(object):
     return fenetrePrincipale.get_size()[0]/2-object.get_size()[0]/2,fenetrePrincipale.get_size()[1]/2-object.get_size()[1]/2
 
-def lancer_jeu():
+def lancer_jeu(mat = False):
     garderOuvert = True
     spritesPiecesGroupe = pygame.sprite.Group()
     joueur = 'blanc'
@@ -415,12 +417,7 @@ def lancer_jeu():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    garderOuvert = False
-                if event.key == pygame.K_a:
-                    if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
-                        xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
-                        print(plateau1.get_object(yOr,xOr).aBoujé)
-            
+                    garderOuvert = False            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                     xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
@@ -432,11 +429,12 @@ def lancer_jeu():
                                 deuxiemeClic = True
                                 xDest,yDest = plateau1.get_case(int(pygame.mouse.get_pos()[0]),pygame.mouse.get_pos()[1])
                                 xDest,yDest = int(xDest),int(yDest)
-                        joueur,coupEffectué = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,joueur)
-                        if coupEffectué == True:
+                        joueur,coupEffectué,mat = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,joueur,mat)
+                        if coupEffectué == True and mat == False:
                             print(f" \nC'est le tour des {joueur}s")
                 
-
+        if mat == True:
+            garderOuvert = False
 
         #Placement des images de fond
         fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
@@ -452,5 +450,3 @@ def lancer_jeu():
 plateau1 = plateau()
 plateau1.placement_debut()
 lancer_jeu()
-
-print('''C'est le tour des blancs''')
