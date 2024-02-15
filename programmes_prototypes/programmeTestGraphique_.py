@@ -104,8 +104,10 @@ class pion(pièce): #ajouter mouvement diagonale lors de couleur différente
                 if plateau1.grille[yOr-2][xOr].estVide() == True and self.aBoujé == False and yOr > 1:
                     possibilités.append((yOr-2,xOr))
             for i in [1,-1]:
-                if plateau1.grille[yOr-1][xOr+i-1].estVide() == False and plateau1.grille[yOr-1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
+                if plateau1.grille[yOr-1][xOr+i].estVide() == False and plateau1.grille[yOr-1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
+                    print('test')
                     possibilités.append((yOr-1,xOr+i))
+                    print('mouvAjouté')
         if self.avoirCouleur() == 'noir' and yOr < 7:
             if plateau1.grille[yOr+1][xOr].estVide() == True:
                 possibilités.append((yOr+1,xOr))
