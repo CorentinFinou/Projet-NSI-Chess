@@ -109,13 +109,13 @@ class pion(pièce): #ajouter mouvement diagonale lors de couleur différente
         if self.avoirCouleur() == 'noir' and yOr < 7:
             if plateau1.grille[yOr+1][xOr].estVide() == True:
                 possibilités.append((yOr+1,xOr))
-                if plateau1.grille[yOr+2][xOr].estVide() == True and self.aBoujé == False and yOr > 6:
+                if plateau1.grille[yOr+2][xOr].estVide() == True and self.aBoujé == False and yOr < 6:
                     possibilités.append((yOr+2,xOr))
+                    print('oui')
             for i in [1,-1]:
                 if plateau1.grille[yOr+1][xOr+i].estVide() == False and plateau1.grille[yOr+1][xOr+i].couleurContenuDifferentVerif(self.couleur)==True:
                     possibilités.append((yOr+1,xOr+i))
         return possibilités
-        
 
 class tour(pièce): #pièce marchant, ne plus toucher sauf pour ajout
     def __init__(self, x, y,couleur):
@@ -366,7 +366,7 @@ class plateau:
         return posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10)
 
  
-def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',echec = False, coupPrécédentEffectué = True):
+def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
     xOr,yOr = piece.avoirPosition()
     try:
         assert plateau1.grille[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
@@ -375,6 +375,7 @@ def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',echec = False,
         possibilités = piece.mouvement(xOr,yOr)
         try:
             assert (yDest,xDest) in possibilités, 'Mouvement impossible'
+            pieceMangée = plateau1.grille[yDest][xDest].getParamCase()[0]
             if piece.avoirType() != pion:
                 plateau1.grille[yDest][xDest].modifContenu(plateau1.grille[yOr][xOr].contenu)
             else :
@@ -382,17 +383,12 @@ def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',echec = False,
                 plateau1.grille[yDest][xDest].contenu.aBoujé = True
             plateau1.grille[yOr][xOr].modifContenu(None)
             piece.bougerImage(xDest,yDest,groupe)
-            #test pour echecs :
-            possibilités = plateau1.get_object(yDest,xDest).mouvement(xDest,yDest)
-            for piece in possibilités:
-                pieceParam = plateau1.get_object(piece[0],piece[1])
-                if pieceParam != None:
-                    if pieceParam.avoirType() == roi:
-                        if pieceParam.avoirCouleur() != plateau1.get_object(yDest,xDest).avoirCouleur(): # fonctionalité de la condition a tester 
-                            print("echec")
-                            echec = True
+            #test pour mat :
+            print(pieceMangée)
+            
         except AssertionError as error:
             print(error)
+            print(possibilités)
             coupPrécédentEffectué = False
     except AssertionError as error:
         print(error) 
@@ -420,6 +416,11 @@ def lancer_jeu():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     garderOuvert = False
+                if event.key == pygame.K_a:
+                    if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
+                        xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
+                        print(plateau1.get_object(yOr,xOr).aBoujé)
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                     xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
