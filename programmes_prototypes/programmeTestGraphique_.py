@@ -448,10 +448,24 @@ def lancer_jeu(mat = False):
         fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
         objetFutur = pygame.draw.rect(imageFondForet, "black",(0+imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,centrer(imageShop)[1],fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
         
+        cartes()
+
         #Placement des images des pièces
         spritesPiecesGroupe.draw(fenetrePrincipale)
         spritesPiecesGroupe.update()
         pygame.display.flip()
+
+def cartes():
+    spritesCartesGroup = pygame.sprite.Group()
+
+    carteTestSprite = pygame.sprite.Sprite() #faire une class carte après
+    carteTestSprite.image = pygame.transform.scale(consts.imageCarteGel, (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
+
+    carteTestSprite.sprite.rect = carteTestSprite.sprite.image.get_rect()
+    spritesCartesGroup.add(carteTestSprite)
+
+    spritesCartesGroup.draw(fenetrePrincipale)
+    spritesCartesGroup.update()
 
 plateau1 = plateau()
 plateau1.placement_debut()
