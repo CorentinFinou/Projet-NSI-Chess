@@ -38,7 +38,8 @@ class Bouton:
 
 # Fonctions pour les actions des boutons
 def action_jouer():
-    os.system("python main.py")
+    os.system("python ../programmes_prototypes/programmeTestGraphique_.py")
+    action_quitter()
 
 def action_quitter():
     pygame.quit()
@@ -56,6 +57,9 @@ while en_cours:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             en_cours = False
+        if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    action_quitter()      
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 pos = pygame.mouse.get_pos()
