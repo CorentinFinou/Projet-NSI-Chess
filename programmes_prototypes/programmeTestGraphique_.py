@@ -3,8 +3,9 @@ import pygame,consts
 pygame.init()
 fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 imageFondForet = pygame.transform.scale(consts.imageFondForet,(fenetrePrincipale.get_size()[0], fenetrePrincipale.get_size()[1]))
-imageShop = pygame.transform.scale(consts.imageShop, (fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
+imageShop = pygame.transform.scale(consts.imageShop, (fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.60))
 imagePlateau = pygame.transform.scale(consts.imagePlateau, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]*2-80,fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]*2-80))
+carteTestSprite = pygame.sprite.Sprite()
 
 imgsPiecesB = [consts.imagePionB,consts.imageTourB,consts.imageFouB,consts.imageCavalierB,consts.imageReineB,consts.imageRoiB]
 imgsPiecesN = [consts.imagePionN,consts.imageTourN,consts.imageFouN,consts.imageCavalierN,consts.imageReineN,consts.imageRoiN]
@@ -443,12 +444,13 @@ def lancer_jeu(mat = False):
             garderOuvert = False
 
         #Placement des images de fond
-        fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
-        fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,centrer(imageShop)[1]))
-        fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
-        objetFutur = pygame.draw.rect(imageFondForet, "black",(0+imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,centrer(imageShop)[1],fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
-        
         cartes()
+        fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
+        fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,centrer(imageShop)[1]-carteTestSprite.image.get_rect()[2]))
+        fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
+        objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
+        
+        
 
         #Placement des images des pièces
         spritesPiecesGroupe.draw(fenetrePrincipale)
@@ -457,11 +459,11 @@ def lancer_jeu(mat = False):
 
 def cartes():
     spritesCartesGroup = pygame.sprite.Group()
-
-    carteTestSprite = pygame.sprite.Sprite() #faire une class carte après
+    
+    #faire une class carte après
     carteTestSprite.image = pygame.transform.scale(consts.imageCarteGel, (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
 
-    carteTestSprite.sprite.rect = carteTestSprite.sprite.image.get_rect()
+    carteTestSprite.rect = carteTestSprite.image.get_rect()
     spritesCartesGroup.add(carteTestSprite)
 
     spritesCartesGroup.draw(fenetrePrincipale)
