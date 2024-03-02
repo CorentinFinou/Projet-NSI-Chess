@@ -465,6 +465,7 @@ def jeu():
         carteTestSprite.image = pygame.transform.scale(consts.imageCarteGel, (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
 
         carteTestSprite.rect = carteTestSprite.image.get_rect()
+        carteTestSprite.rect.topleft = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - carteTestSprite.rect.width/2 -20, fenetrePrincipale.get_height()-carteTestSprite.rect.height-20)
         spritesCartesGroup.add(carteTestSprite)
 
         spritesCartesGroup.draw(fenetrePrincipale)
