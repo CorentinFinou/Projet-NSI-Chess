@@ -444,8 +444,8 @@ def lancer_jeu(mat = False):
             garderOuvert = False
 
         #Placement des images de fond
-        cartes()
         fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
+        cartes()
         fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,centrer(imageShop)[1]-carteTestSprite.image.get_rect()[2]))
         fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
         objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))

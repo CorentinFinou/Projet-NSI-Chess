@@ -26,4 +26,4 @@ imageCarteGel = pygame.image.load("../img/items/cards/gel_carte.png").convert_al
 
 #items/buttons
 bouton_jouer_img = pygame.image.load('../img/items/buttons/bouton_jouer.png').convert_alpha()
-bouton_quitter_img = pygame.image.load('bouton_quitter.png').convert_alpha()
+bouton_quitter_img = pygame.image.load('../img/items/buttons/bouton_quitter.png').convert_alpha()
