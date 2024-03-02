@@ -1,17 +1,15 @@
 import pygame
 import os
 
+#import images avec noms correspondant aux noms donnés par paul aux variables du programme
+from consts import imageFondForet as fond_menu, bouton_jouer_img,bouton_quitter_img 
+
 # Initialisation de Pygame
 pygame.init()
 
 # Paramètres de la fenêtre
 fenetre = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 pygame.display.set_caption("Menu")
-
-# Chargement des images
-fond_menu = pygame.image.load('Fond_foret.png').convert()
-bouton_jouer_img = pygame.image.load('bouton_jouer.png').convert_alpha()
-bouton_quitter_img = pygame.image.load('bouton_quitter.png').convert_alpha()
 
 # Redimensionnement des images
 fond_menu = pygame.transform.scale(fond_menu, fenetre.get_size())
