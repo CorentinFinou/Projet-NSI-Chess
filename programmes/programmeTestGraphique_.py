@@ -371,7 +371,28 @@ def jeu():
             posYforCase = mouseY-decalage_y
             return posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10)
 
-    
+    class carte():
+            def __init__(self, ordrePile, type):
+                self.ordrePile = ordrePile
+                self.sprite = None
+                self.type = type
+  
+            def avoirType(self):
+                return self.type
+            
+            def definirSprite(self):
+                listeCartes = {'gel': consts.imageCarteGel,
+                               'intagibilité' : 'const.imageIntangibiltié',
+                               'immolation' : 'consts.imageImmolation'}#a faire en classe si besoin dans le futur
+                self.sprite = pygame.sprite.Sprite()
+                self.sprite.image = pygame.transform.scale(listeCartes[self.type], (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
+
+            def affichage(self,groupe):
+                self.definirSprite()
+                self.sprite.rect = self.sprite.image.get_rect()
+                self.sprite.rect.topleft = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.rect[2]/2 -20, fenetrePrincipale.get_height()-self.sprite.rect[3]-20)
+                groupe.add(self.sprite)
+
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
         try:
@@ -414,6 +435,7 @@ def jeu():
     def lancer_jeu(mat = False):
         garderOuvert = True
         spritesPiecesGroupe = pygame.sprite.Group()
+        spritesCartesGroup = pygame.sprite.Group()
         joueur = 'blanc'
         #print(f" \nC'est le tour des {joueur}s")
         for ligne in plateau1.grille:
@@ -424,7 +446,11 @@ def jeu():
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
-                        garderOuvert = False            
+                        garderOuvert = False  
+                    if event.key == pygame.K_a:
+                        carteTest = carte(1,'gel')   
+                        carteTest.definirSprite()
+                        carteTest.affichage(spritesCartesGroup)       
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                         xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
@@ -446,8 +472,7 @@ def jeu():
 
             #Placement des images de fond
             fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
-            cartes()
-            fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,centrer(imageShop)[1]-carteTestSprite.image.get_rect()[2]))
+            fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,centrer(imageShop)[1]-fenetrePrincipale.get_size()[1]/3))
             fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
             objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
             
@@ -456,20 +481,9 @@ def jeu():
             #Placement des images des pièces
             spritesPiecesGroupe.draw(fenetrePrincipale)
             spritesPiecesGroupe.update()
+            spritesCartesGroup.draw(fenetrePrincipale)
+            spritesCartesGroup.update()
             pygame.display.flip()
-
-    def cartes():
-        spritesCartesGroup = pygame.sprite.Group()
-        
-        #faire une class carte après
-        carteTestSprite.image = pygame.transform.scale(consts.imageCarteGel, (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
-
-        carteTestSprite.rect = carteTestSprite.image.get_rect()
-        carteTestSprite.rect.topleft = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - carteTestSprite.rect.width/2 -20, fenetrePrincipale.get_height()-carteTestSprite.rect.height-20)
-        spritesCartesGroup.add(carteTestSprite)
-
-        spritesCartesGroup.draw(fenetrePrincipale)
-        spritesCartesGroup.update()
 
     plateau1 = plateau()
     plateau1.placement_debut()
