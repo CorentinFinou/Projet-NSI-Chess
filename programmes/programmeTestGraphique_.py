@@ -371,7 +371,7 @@ def jeu():
             posYforCase = mouseY-decalage_y
             return posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10)
 
-    class carte():
+    class carte:
             def __init__(self, ordrePile, type, groupe):
                 self.ordrePile = ordrePile
                 self.sprite = None
@@ -388,19 +388,19 @@ def jeu():
                                'immolation' : 'consts.imageImmolation'}#a faire en classe si besoin dans le futur
                 self.sprite = pygame.sprite.Sprite()
                 self.sprite.image = pygame.transform.scale(listeCartes[self.type], (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
-                self.sprite.rect = self.sprite.image.get_rect()
-                if self.position == None:
-                    self.position = self.sprite.rect[2:4]
-
 
             def affichage(self):
                 self.definirSprite()
-                self.sprite.rect.topleft = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.position[0]/2 -20, fenetrePrincipale.get_height()-self.position[1]-20)
+                if not self.position:
+                    self.position = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.image.get_width()/2 -20, fenetrePrincipale.get_height()-self.sprite.image.get_height()-20)
+                self.sprite.rect = self.sprite.image.get_rect()
+                self.sprite.rect.topleft = self.position
+                print(self.sprite.rect.topleft)
                 self.groupe.add(self.sprite)
             
-            def modifierPosition(self):
+            def modifierPosition(self, newPos):
                 self.groupe.remove(self.sprite)
-                self.position[0],self.position[1] = self.position[0] + 50,self.position[1]+50
+                self.position = newPos
                 self.affichage()
 
 
@@ -460,10 +460,14 @@ def jeu():
                     if event.key == pygame.K_ESCAPE:
                         garderOuvert = False  
                     if event.key == pygame.K_a:
-                        carteTest = carte(1,'gel', spritesCartesGroup)
-                        cartes.append(carteTest)   
-                        carteTest.definirSprite()
-                        carteTest.affichage() 
+                        if cartes == []:
+                            carteTest = carte(1,'gel', spritesCartesGroup)
+                            cartes.append(carteTest)   
+                            carteTest.definirSprite()
+                            carteTest.affichage() 
+                        else:
+                            print(' : ')
+                            carteTest.modifierPosition((int(input()),int(input())))
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                         xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
@@ -479,10 +483,18 @@ def jeu():
                             if coupEffectué == True and mat == False:
                                 pass
                                 #print(f" \nC'est le tour des {joueur}s")
-                    elif event.button == 1 :
+                    if event.button == 1 :
+                        print(pygame.mouse.get_pos())
                         for e in cartes:
                             if e.sprite.rect.collidepoint(pygame.mouse.get_pos()):
-                                carteTest.modifierPosition()
+                                relativeOrigine = pygame.mouse.get_pos()
+                                relacher = False
+                                while not relacher:
+                                    newPos = pygame.mouse.get_pos()
+                                    carteTest.modifierPosition(newPos)
+                                    if pygame.event.wait().type == pygame.MOUSEBUTTONUP:
+                                        relacher = True
+                                print(relativeOrigine,newPos)
             if mat == True:
                 garderOuvert = False
 
