@@ -378,6 +378,7 @@ def jeu():
                 self.type = type
                 self.position = None
                 self.groupe = groupe
+                self.selectionnee = False
   
             def avoirType(self):
                 return self.type
@@ -395,12 +396,11 @@ def jeu():
                     self.position = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.image.get_width()/2 -20, fenetrePrincipale.get_height()-self.sprite.image.get_height()-20)
                 self.sprite.rect = self.sprite.image.get_rect()
                 self.sprite.rect.topleft = self.position
-                print(self.sprite.rect.topleft)
                 self.groupe.add(self.sprite)
             
             def modifierPosition(self, newPos):
                 self.groupe.remove(self.sprite)
-                self.position = newPos
+                self.position = newPos[0]-self.sprite.image.get_width()/2,newPos[1]-self.sprite.image.get_height()/2
                 self.affichage()
 
 
@@ -487,14 +487,15 @@ def jeu():
                         print(pygame.mouse.get_pos())
                         for e in cartes:
                             if e.sprite.rect.collidepoint(pygame.mouse.get_pos()):
-                                relativeOrigine = pygame.mouse.get_pos()
-                                relacher = False
-                                while not relacher:
-                                    newPos = pygame.mouse.get_pos()
-                                    carteTest.modifierPosition(newPos)
-                                    if pygame.event.wait().type == pygame.MOUSEBUTTONUP:
-                                        relacher = True
-                                print(relativeOrigine,newPos)
+                                carteTest.selectionnee = True
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if cartes != []:
+                        carteTest.selectionnee = False
+                elif event.type == pygame.MOUSEMOTION:
+                    if cartes != [] and carteTest.selectionnee:
+                        newPos = pygame.mouse.get_pos()
+                        carteTest.modifierPosition(newPos)
+                        print(newPos)
             if mat == True:
                 garderOuvert = False
 
