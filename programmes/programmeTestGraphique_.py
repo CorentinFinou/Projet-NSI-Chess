@@ -372,11 +372,12 @@ def jeu():
             return posXforCase//(imagePlateau.get_width()/10),posYforCase//(imagePlateau.get_height()/10)
 
     class carte():
-            def __init__(self, ordrePile, type):
+            def __init__(self, ordrePile, type, groupe):
                 self.ordrePile = ordrePile
                 self.sprite = None
                 self.type = type
-                self.position = (0,0)
+                self.position = None
+                self.groupe = groupe
   
             def avoirType(self):
                 return self.type
@@ -387,16 +388,21 @@ def jeu():
                                'immolation' : 'consts.imageImmolation'}#a faire en classe si besoin dans le futur
                 self.sprite = pygame.sprite.Sprite()
                 self.sprite.image = pygame.transform.scale(listeCartes[self.type], (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
-
-            def affichage(self,groupe):
-                self.definirSprite()
                 self.sprite.rect = self.sprite.image.get_rect()
-                self.position = self.sprite.rect[2:4]
-                self.sprite.rect.topleft = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.rect[2]/2 -20, fenetrePrincipale.get_height()-self.sprite.rect[3]-20)
-                groupe.add(self.sprite)
+                if self.position == None:
+                    self.position = self.sprite.rect[2:4]
+
+
+            def affichage(self):
+                self.definirSprite()
+                self.sprite.rect.topleft = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.position[0]/2 -20, fenetrePrincipale.get_height()-self.position[1]-20)
+                self.groupe.add(self.sprite)
             
             def modifierPosition(self):
-                print('position Modifiée')
+                self.groupe.remove(self.sprite)
+                self.position[0],self.position[1] = self.position[0] + 50,self.position[1]+50
+                self.affichage()
+
 
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
@@ -454,10 +460,10 @@ def jeu():
                     if event.key == pygame.K_ESCAPE:
                         garderOuvert = False  
                     if event.key == pygame.K_a:
-                        carteTest = carte(1,'gel')
+                        carteTest = carte(1,'gel', spritesCartesGroup)
                         cartes.append(carteTest)   
                         carteTest.definirSprite()
-                        carteTest.affichage(spritesCartesGroup) 
+                        carteTest.affichage() 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                         xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
