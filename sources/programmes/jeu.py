@@ -411,8 +411,15 @@ def jeu():
                 case = plateau1.get_case(self.position[0]+self.sprite.image.get_width()/2,self.position[1]+self.sprite.image.get_height()/2)
                 if case[0]<0 or case[0]>7 or case[1]<0 or case[1]>7:
                     self.modifierPosition(self.origin, False)
+                else:
+                    self.action(case)
 
-
+            def action(self,case):
+                if plateau1.grille[int(case[1])][int(case[0])].estVide() == False:
+                    if self.avoirType() == 'gel':
+                        print('gel')
+                else:
+                    self.modifierPosition(self.origin, False)
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
         try:
