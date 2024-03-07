@@ -52,6 +52,9 @@ def jeu():
                 self.y = y
                 self.couleur = couleur
                 self.sprite = None
+                self.moveable = True
+                self.effets = []
+                self.effetsSprites = {}
 
             except AssertionError as error:
                 raise error
@@ -83,6 +86,21 @@ def jeu():
             self.position = centrer_piece(self.x,self.y,self.sprite.image)
             self.sprite.rect.topleft = (self.position[0],self.position[1])
             groupe.add(self.sprite)
+
+        def affichageEffet(self,effet,effetImg,group):
+            if effet in self.effets:
+                self.effets.remove(effet)
+                del self.effetsSprites[effet]
+            else:
+                self.effets.append(effet)
+                self.effetsSprites[effet] = pygame.sprite.Sprite()
+                self.effetsSprites[effet].image = pygame.transform.scale(effetImg,(self.sprite.image.get_width()/3,self.sprite.image.get_height()/3))
+                self.effetsSprites[effet].rect = self.effetsSprites[effet].image.get_rect()
+                print(self.sprite.rect.topright)
+                self.effetsSprites[effet].rect.topright = self.sprite.rect.topright
+                group.add(self.effetsSprites[effet])
+                
+                
 
     def centrer_piece(x,y,imagePiece):
             decalage_x = (fenetrePrincipale.get_size()[0] - (imagePlateau.get_width()/10*8)) / 2
@@ -379,6 +397,7 @@ def jeu():
                 self.position = None
                 self.groupe = groupe
                 self.selectionnee = False
+                self.jouee = False
   
             def avoirType(self):
                 return self.type
@@ -407,17 +426,21 @@ def jeu():
                     self.position = None
                 self.affichage()
 
-            def verifierAction(self):
+            def verifierAction(self,joueur,groupeEffet):
                 case = plateau1.get_case(self.position[0]+self.sprite.image.get_width()/2,self.position[1]+self.sprite.image.get_height()/2)
                 if case[0]<0 or case[0]>7 or case[1]<0 or case[1]>7:
                     self.modifierPosition(self.origin, False)
                 else:
-                    self.action(case)
+                    self.action(case,joueur,groupeEffet)
 
-            def action(self,case):
-                if plateau1.grille[int(case[1])][int(case[0])].estVide() == False:
+            def action(self,case,joueur,groupeEffet):
+                if plateau1.grille[int(case[1])][int(case[0])].estVide() == False and plateau1.get_object(int(case[1]),int(case[0])).couleur != joueur:
+                    target = plateau1.get_object(int(case[1]),int(case[0]))
                     if self.avoirType() == 'gel':
-                        print('gel')
+                        target.moveable = False
+                        target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
+                        self.sprite.kill()
+                        self.jouee = True
                 else:
                     self.modifierPosition(self.origin, False)
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
@@ -463,7 +486,9 @@ def jeu():
         garderOuvert = True
         spritesPiecesGroupe = pygame.sprite.Group()
         spritesCartesGroup = pygame.sprite.Group()
+        spritesEffetsGroup = pygame.sprite.Group()
         cartes = []
+        cartesJouées = []
         joueur = 'blanc'
         #print(f" \nC'est le tour des {joueur}s")
         for ligne in plateau1.grille:
@@ -488,7 +513,7 @@ def jeu():
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                         xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
                         pieceABouger = plateau1.get_object(yOr,xOr)
-                        if pieceABouger != None and pieceABouger.avoirCouleur() == joueur:
+                        if pieceABouger != None and pieceABouger.avoirCouleur() == joueur and pieceABouger.moveable == True:
                             deuxiemeClic = False
                             while deuxiemeClic == False:
                                 if pygame.event.wait().type == pygame.MOUSEBUTTONDOWN:
@@ -503,14 +528,18 @@ def jeu():
                         for e in cartes:
                             if e.sprite.rect.collidepoint(pygame.mouse.get_pos()):
                                 carteTest.selectionnee = True
-                elif event.type == pygame.MOUSEBUTTONUP:
-                    if cartes != [] and carteTest.selectionnee:
-                        carteTest.selectionnee = False
-                        carteTest.verifierAction()
                 elif event.type == pygame.MOUSEMOTION:
                     if cartes != [] and carteTest.selectionnee:
                         newPos = pygame.mouse.get_pos()
                         carteTest.modifierPosition(newPos)
+                elif event.type == pygame.MOUSEBUTTONUP:
+                    if cartes != [] and carteTest.selectionnee:
+                        carteTest.selectionnee = False
+                        carteTest.verifierAction(joueur,spritesEffetsGroup)
+                        if carteTest.jouee == True:
+                            cartes.remove(carteTest)
+                            cartesJouées.append(carteTest)
+                            del carteTest
             if mat == True:
                 garderOuvert = False
 
@@ -527,6 +556,8 @@ def jeu():
             spritesPiecesGroupe.update()
             spritesCartesGroup.draw(fenetrePrincipale)
             spritesCartesGroup.update()
+            spritesEffetsGroup.draw(fenetrePrincipale)
+            spritesEffetsGroup.update()
             pygame.display.flip()
 
     plateau1 = plateau()

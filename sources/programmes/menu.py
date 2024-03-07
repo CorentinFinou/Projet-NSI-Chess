@@ -40,7 +40,7 @@ def menu():
     def action_jouer(self):
         self.state = True
 
-    def action_quitter():
+    def action_quitter(self):
         pygame.quit()
         quit()
 
