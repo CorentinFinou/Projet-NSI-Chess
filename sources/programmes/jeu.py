@@ -1,6 +1,5 @@
 import pygame,consts
 def jeu():
-    print('test')
     pygame.init()
     fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     imageFondForet = pygame.transform.scale(consts.imageFondForet,(fenetrePrincipale.get_size()[0], fenetrePrincipale.get_size()[1]))
@@ -96,7 +95,6 @@ def jeu():
                 self.effetsSprites[effet] = pygame.sprite.Sprite()
                 self.effetsSprites[effet].image = pygame.transform.scale(effetImg,(self.sprite.image.get_width()/3,self.sprite.image.get_height()/3))
                 self.effetsSprites[effet].rect = self.effetsSprites[effet].image.get_rect()
-                print(self.sprite.rect.topright)
                 self.effetsSprites[effet].rect.topright = self.sprite.rect.topright
                 group.add(self.effetsSprites[effet])
                 
@@ -392,7 +390,8 @@ def jeu():
     class carte:
             def __init__(self, ordrePile, type, groupe):
                 self.ordrePile = ordrePile
-                self.sprite = None
+                self.sprite = pygame.sprite.Sprite()
+                self.sprite.image = None
                 self.type = type
                 self.position = None
                 self.groupe = groupe
@@ -405,9 +404,12 @@ def jeu():
             def definirSprite(self):
                 listeCartes = {'gel': consts.imageCarteGel,
                                'intagibilité' : 'const.imageIntangibiltié',
-                               'immolation' : 'consts.imageImmolation'}#a faire en classe si besoin dans le futur
-                self.sprite = pygame.sprite.Sprite()
-                self.sprite.image = pygame.transform.scale(listeCartes[self.type], (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
+                               'immolation' : 'consts.imageImmolation',#a faire en classe si besoin dans le futur
+                               'invocation' : consts.imageCarteInvocation}
+                if self.sprite.image == None:
+                    self.sprite.image = pygame.transform.scale(listeCartes[self.type], (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
+                    self.sprite.imageInitiale = self.sprite.image                    
+                    
 
             def affichage(self):
                 self.definirSprite()
@@ -443,6 +445,9 @@ def jeu():
                         self.jouee = True
                 else:
                     self.modifierPosition(self.origin, False)
+
+
+
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
         try:
@@ -500,15 +505,25 @@ def jeu():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         garderOuvert = False  
-                    if event.key == pygame.K_a:
-                        if cartes == []:
-                            carteTest = carte(1,'gel', spritesCartesGroup)
-                            cartes.append(carteTest)   
-                            carteTest.definirSprite()
-                            carteTest.affichage() 
-                        else:
-                            print(' : ')
-                            carteTest.modifierPosition((int(input()),int(input())))
+                    if event.key == pygame.K_a and len(cartes)<=2:
+                        carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
+                        cartes.append(carteTest)   
+                        carteTest.definirSprite()
+                        carteTest.affichage() 
+                        for i in range(len(cartes)):
+                            c = cartes[i]
+                            spritesCartesGroup.remove(c.sprite)
+                            if len(cartes) == 1:
+                                pass
+                            else:
+                                c = cartes[i]
+                                if c in cartes[:len(cartes)-1]:
+                                    c.position = c.position[0]-(c.sprite.image.get_width()/2)*(len(cartes)-1),c.position[1]
+                                else:
+                                    c.position = c.position[0]+(c.sprite.image.get_width()/2),c.position[1]
+                            c.sprite.image = pygame.transform.scale(c.sprite.imageInitiale,(c.sprite.imageInitiale.get_width()/(1.1**len(cartes)),c.sprite.imageInitiale.get_height()/(1.1**len(cartes))))
+                                #c.sprite.rect = c.sprite.image.get_rect()
+                            c.affichage()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                         xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
