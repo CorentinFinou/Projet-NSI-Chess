@@ -4,7 +4,7 @@ pygame.init()
 fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 #Fonds
 imageFondForet = pygame.image.load("../img/fonds/Fond_foret.png").convert()
-imageShop = pygame.image.load("../img/gui/interface_shop.png").convert()
+imageShop = pygame.image.load("../img/gui/interface_shop.png").convert_alpha()
 imagePlateau = pygame.image.load("../img/gui/plateau.png").convert()
 
 #items/pieces

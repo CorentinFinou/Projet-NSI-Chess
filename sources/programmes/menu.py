@@ -1,5 +1,4 @@
 import pygame
-import os
 
 def menu():
     #import images avec noms correspondant aux noms donnés par paul aux variables du programme

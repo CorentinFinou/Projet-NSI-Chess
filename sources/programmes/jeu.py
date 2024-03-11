@@ -392,8 +392,10 @@ def jeu():
                 self.ordrePile = ordrePile
                 self.sprite = pygame.sprite.Sprite()
                 self.sprite.image = None
+                self.sprite.imageInitiale = None
                 self.type = type
                 self.position = None
+                self.origin = None
                 self.groupe = groupe
                 self.selectionnee = False
                 self.jouee = False
@@ -408,14 +410,16 @@ def jeu():
                                'invocation' : consts.imageCarteInvocation}
                 if self.sprite.image == None:
                     self.sprite.image = pygame.transform.scale(listeCartes[self.type], (fenetrePrincipale.get_size()[0]/10,fenetrePrincipale.get_size()[1]/3))
-                    self.sprite.imageInitiale = self.sprite.image                    
+                    if not self.sprite.imageInitiale:
+                        self.sprite.imageInitiale = self.sprite.image                    
                     
 
             def affichage(self):
                 self.definirSprite()
                 if not self.position:
                     self.position = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.image.get_width()/2 -20, fenetrePrincipale.get_height()-self.sprite.image.get_height()-20)
-                self.origin = self.position
+                if not self.origin:
+                    self.origin = self.position
                 self.sprite.rect = self.sprite.image.get_rect()
                 self.sprite.rect.topleft = self.position
                 self.groupe.add(self.sprite)
@@ -425,7 +429,7 @@ def jeu():
                 if valid:
                     self.position = newPos[0]-self.sprite.image.get_width()/2,newPos[1]-self.sprite.image.get_height()/2
                 else:
-                    self.position = None
+                    self.position = newPos
                 self.affichage()
 
             def verifierAction(self,joueur,groupeEffet):
@@ -494,6 +498,7 @@ def jeu():
         spritesEffetsGroup = pygame.sprite.Group()
         cartes = []
         cartesJouées = []
+        carteActuelle = None
         joueur = 'blanc'
         #print(f" \nC'est le tour des {joueur}s")
         for ligne in plateau1.grille:
@@ -509,20 +514,20 @@ def jeu():
                         carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
                         cartes.append(carteTest)   
                         carteTest.definirSprite()
-                        carteTest.affichage() 
+                        carteTest.affichage()
                         for i in range(len(cartes)):
                             c = cartes[i]
                             spritesCartesGroup.remove(c.sprite)
                             if len(cartes) == 1:
                                 pass
                             else:
-                                c = cartes[i]
                                 if c in cartes[:len(cartes)-1]:
-                                    c.position = c.position[0]-(c.sprite.image.get_width()/2)*(len(cartes)-1),c.position[1]
+                                    c.origin = c.origin[0]-(c.sprite.image.get_width()/2)*(len(cartes)-1)+5,c.origin[1]
                                 else:
-                                    c.position = c.position[0]+(c.sprite.image.get_width()/2),c.position[1]
-                            c.sprite.image = pygame.transform.scale(c.sprite.imageInitiale,(c.sprite.imageInitiale.get_width()/(1.1**len(cartes)),c.sprite.imageInitiale.get_height()/(1.1**len(cartes))))
-                                #c.sprite.rect = c.sprite.image.get_rect()
+                                    c.origin = c.origin[0]+(c.sprite.image.get_width()/2+5),c.origin[1]
+                            c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.imageInitiale.get_width()*0.90**(len(cartes)-1),c.sprite.imageInitiale.get_height()*0.90**(len(cartes)-1)))
+                            c.position = c.origin
+                            c.sprite.rect = c.sprite.image.get_rect()
                             c.affichage()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
@@ -542,25 +547,28 @@ def jeu():
                     if event.button == 1 :
                         for e in cartes:
                             if e.sprite.rect.collidepoint(pygame.mouse.get_pos()):
-                                carteTest.selectionnee = True
+                                carteActuelle = e
+                                carteActuelle.selectionnee = True
                 elif event.type == pygame.MOUSEMOTION:
-                    if cartes != [] and carteTest.selectionnee:
-                        newPos = pygame.mouse.get_pos()
-                        carteTest.modifierPosition(newPos)
+                    if carteActuelle:
+                        if cartes != [] and carteActuelle.selectionnee:
+                            newPos = pygame.mouse.get_pos()
+                            carteActuelle.modifierPosition(newPos)
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    if cartes != [] and carteTest.selectionnee:
-                        carteTest.selectionnee = False
-                        carteTest.verifierAction(joueur,spritesEffetsGroup)
-                        if carteTest.jouee == True:
-                            cartes.remove(carteTest)
-                            cartesJouées.append(carteTest)
-                            del carteTest
+                    if carteActuelle:
+                        if cartes != [] and carteActuelle.selectionnee:
+                            carteActuelle.selectionnee = False
+                            carteActuelle.verifierAction(joueur,spritesEffetsGroup)
+                            if carteTest.jouee == True:
+                                cartes.remove(carteTest)
+                                cartesJouées.append(carteTest)
+                                del carteActuelle
             if mat == True:
                 garderOuvert = False
 
             #Placement des images de fond
             fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
-            fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,centrer(imageShop)[1]-fenetrePrincipale.get_size()[1]/3))
+            fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,(fenetrePrincipale.get_size()[1]*0.10)//2))
             fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
             objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
             
