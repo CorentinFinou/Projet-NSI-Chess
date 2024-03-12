@@ -4,8 +4,9 @@ def jeu():
     fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
     imageFondForet = pygame.transform.scale(consts.imageFondForet,(fenetrePrincipale.get_size()[0], fenetrePrincipale.get_size()[1]))
     imageShop = pygame.transform.scale(consts.imageShop, (fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.60))
+    imageShopGauche = pygame.transform.scale(consts.imageShop, (fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
     imagePlateau = pygame.transform.scale(consts.imagePlateau, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]*2-80,fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]*2-80))
-    carteTestSprite = pygame.sprite.Sprite()
+    imageBoutonCartes = pygame.transform.scale(consts.bouton_jouer_img,(imageShop.get_width()*0.6,imageShop.get_width()*0.3))
 
     imgsPiecesB = [consts.imagePionB,consts.imageTourB,consts.imageFouB,consts.imageCavalierB,consts.imageReineB,consts.imageRoiB]
     imgsPiecesN = [consts.imagePionN,consts.imageTourN,consts.imageFouN,consts.imageCavalierN,consts.imageReineN,consts.imageRoiN]
@@ -450,7 +451,47 @@ def jeu():
                 else:
                     self.modifierPosition(self.origin, False)
 
+    class Bouton:
+        def __init__(self, surface, x, y, image, action):
+            self.rect = image.get_rect()
+            self.rect.topleft = (x, y)
+            self.image = image
+            self.action = action
+            self.state = False
+            self.surface = surface
 
+        def dessiner(self):
+            self.surface.blit(self.image, self.rect)
+
+        def verifier_clic(self, pos):
+            print(pos)
+            print(self.rect)
+            if self.rect.collidepoint(pos):
+                return True
+    
+    def ajouterCarte(cartes,spritesCartesGroup):
+        print('test')
+        if len(cartes)<=2:
+            carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
+            cartes.append(carteTest)   
+            carteTest.definirSprite()
+            carteTest.affichage()
+            for i in range(len(cartes)):
+                c = cartes[i]
+                spritesCartesGroup.remove(c.sprite)
+                c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.imageInitiale.get_width()*0.90**(len(cartes)-1),c.sprite.imageInitiale.get_height()*0.90**(len(cartes)-1)))
+                if len(cartes) == 1:
+                    pass
+                else:
+                    if c in cartes[:len(cartes)-1]:
+                        c.origin = c.origin[0]-((c.sprite.imageInitiale.get_width()/2)*(len(cartes)-1))+20,c.origin[1]
+                    else:
+                        c.origin = c.origin[0]+(c.sprite.imageInitiale.get_width()/2),c.origin[1]
+                if len(cartes) == 3:
+                    c.origin = c.origin[0] + 60,c.origin[1]
+                c.position = c.origin
+                c.sprite.rect = c.sprite.image.get_rect()
+                c.affichage()
 
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
@@ -498,6 +539,7 @@ def jeu():
         spritesEffetsGroup = pygame.sprite.Group()
         cartes = []
         cartesJouées = []
+        boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, 50, imageBoutonCartes, ajouterCarte)
         carteActuelle = None
         joueur = 'blanc'
         #print(f" \nC'est le tour des {joueur}s")
@@ -510,29 +552,6 @@ def jeu():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         garderOuvert = False  
-                    if event.key == pygame.K_a and len(cartes)<=2:
-                        carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
-                        cartes.append(carteTest)   
-                        carteTest.definirSprite()
-                        carteTest.affichage()
-                        for i in range(len(cartes)):
-                            c = cartes[i]
-                            spritesCartesGroup.remove(c.sprite)
-                            c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.imageInitiale.get_width()*0.90**(len(cartes)-1),c.sprite.imageInitiale.get_height()*0.90**(len(cartes)-1)))
-                            if len(cartes) == 1:
-                                pass
-                            else:
-                                if c in cartes[:len(cartes)-1]:
-                                    print(c.avoirType())
-                                    c.origin = c.origin[0]-((c.sprite.imageInitiale.get_width()/2)*(len(cartes)-1))+20,c.origin[1]
-                                else:
-                                    c.origin = c.origin[0]+(c.sprite.imageInitiale.get_width()/2),c.origin[1]
-                            if len(cartes) == 3:
-                                print(c.origin[0])
-                                c.origin = c.origin[0] + 60,c.origin[1]
-                            c.position = c.origin
-                            c.sprite.rect = c.sprite.image.get_rect()
-                            c.affichage()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[0]<=7 and 0<=plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])[1]<=7:
                         xOr,yOr = plateau1.get_case(pygame.mouse.get_pos()[0],pygame.mouse.get_pos()[1])
@@ -549,8 +568,11 @@ def jeu():
                                 pass
                                 #print(f" \nC'est le tour des {joueur}s")
                     if event.button == 1 :
+                        pos = pygame.mouse.get_pos()
+                        if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
+                            boutonCartes.action(cartes,spritesCartesGroup)
                         for e in cartes:
-                            if e.sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                            if e.sprite.rect.collidepoint(pos):
                                 carteActuelle = e
                                 carteActuelle.selectionnee = True
                 elif event.type == pygame.MOUSEMOTION:
@@ -574,10 +596,9 @@ def jeu():
             fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
             fenetrePrincipale.blit(imageShop, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20,(fenetrePrincipale.get_size()[1]*0.10)//2))
             fenetrePrincipale.blit(imagePlateau, centrer(imagePlateau))
-            objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
-            
-            
-
+            #objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
+            fenetrePrincipale.blit(imageShopGauche, (imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2))
+            boutonCartes.dessiner()
             #Placement des images des pièces
             spritesPiecesGroupe.draw(fenetrePrincipale)
             spritesPiecesGroupe.update()
