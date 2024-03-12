@@ -417,7 +417,7 @@ def jeu():
             def affichage(self):
                 self.definirSprite()
                 if not self.position:
-                    self.position = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.image.get_width()/2 -20, fenetrePrincipale.get_height()-self.sprite.image.get_height()-20)
+                    self.position = (fenetrePrincipale.get_width()-imageShop.get_width()/2 - self.sprite.image.get_width()/2 -20, fenetrePrincipale.get_height()-self.sprite.image.get_height()-10)
                 if not self.origin:
                     self.origin = self.position
                 self.sprite.rect = self.sprite.image.get_rect()
@@ -518,14 +518,18 @@ def jeu():
                         for i in range(len(cartes)):
                             c = cartes[i]
                             spritesCartesGroup.remove(c.sprite)
+                            c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.imageInitiale.get_width()*0.90**(len(cartes)-1),c.sprite.imageInitiale.get_height()*0.90**(len(cartes)-1)))
                             if len(cartes) == 1:
                                 pass
                             else:
                                 if c in cartes[:len(cartes)-1]:
-                                    c.origin = c.origin[0]-(c.sprite.image.get_width()/2)*(len(cartes)-1)+5,c.origin[1]
+                                    print(c.avoirType())
+                                    c.origin = c.origin[0]-((c.sprite.imageInitiale.get_width()/2)*(len(cartes)-1))+20,c.origin[1]
                                 else:
-                                    c.origin = c.origin[0]+(c.sprite.image.get_width()/2+5),c.origin[1]
-                            c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.imageInitiale.get_width()*0.90**(len(cartes)-1),c.sprite.imageInitiale.get_height()*0.90**(len(cartes)-1)))
+                                    c.origin = c.origin[0]+(c.sprite.imageInitiale.get_width()/2),c.origin[1]
+                            if len(cartes) == 3:
+                                print(c.origin[0])
+                                c.origin = c.origin[0] + 60,c.origin[1]
                             c.position = c.origin
                             c.sprite.rect = c.sprite.image.get_rect()
                             c.affichage()
