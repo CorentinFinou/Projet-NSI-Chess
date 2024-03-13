@@ -443,7 +443,7 @@ def jeu():
             def action(self,case,joueur,groupeEffet):
                 if plateau1.grille[int(case[1])][int(case[0])].estVide() == False and plateau1.get_object(int(case[1]),int(case[0])).couleur != joueur:
                     target = plateau1.get_object(int(case[1]),int(case[0]))
-                    if self.avoirType() == 'gel':
+                    if self.avoirType() == 'gel' or 'invocation':
                         target.moveable = False
                         target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
                         self.sprite.kill()
@@ -468,12 +468,16 @@ def jeu():
                 return True
     
     def ajouterCarte(cartes,spritesCartesGroup):
-        print('test')
         if len(cartes)<=2:
             carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
             cartes.append(carteTest)   
             carteTest.definirSprite()
             carteTest.affichage()
+            centrerCartes(cartes,spritesCartesGroup)
+            
+    
+    def centrerCartes(cartes,spritesCartesGroup,varitationCartesPositive = True, carteRetirée = None):
+        if varitationCartesPositive:
             for i in range(len(cartes)):
                 c = cartes[i]
                 spritesCartesGroup.remove(c.sprite)
@@ -486,7 +490,26 @@ def jeu():
                     else:
                         c.origin = c.origin[0]+(c.sprite.imageInitiale.get_width()/2),c.origin[1]
                 if len(cartes) == 3:
-                    c.origin = c.origin[0] + 60,c.origin[1]
+                    c.origin = c.origin[0] + (c.sprite.imageInitiale.get_width()*0.90**2)/2,c.origin[1]
+                c.position = c.origin
+                c.sprite.rect = c.sprite.image.get_rect()
+                c.affichage()
+        else:
+            cartes.remove(carteRetirée)
+            for i in range(len(cartes)):
+                print(carteRetirée)
+                print(cartes)
+                c = cartes[i]
+                spritesCartesGroup.remove(c.sprite)
+                c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.image.get_width()/0.90,c.sprite.image.get_height()/0.90))
+                if len(cartes)==0:
+                    pass
+                elif c == carteRetirée:
+                    pass
+                elif len(cartes)==2:
+                    print('test')
+                    if c in cartes[1:]:
+                        c.origin = c.origin[0] - (c.sprite.imageInitiale.get_width()*0.90**2)/2,c.origin[1]
                 c.position = c.origin
                 c.sprite.rect = c.sprite.image.get_rect()
                 c.affichage()
@@ -584,8 +607,8 @@ def jeu():
                             carteActuelle.selectionnee = False
                             carteActuelle.verifierAction(joueur,spritesEffetsGroup)
                             if carteActuelle.jouee == True:
-                                cartes.remove(carteActuelle)
                                 cartesJouées.append(carteActuelle)
+                                centrerCartes(cartes,spritesCartesGroup,False,carteActuelle)
                                 carteActuelle = None
             if mat == True:
                 garderOuvert = False
