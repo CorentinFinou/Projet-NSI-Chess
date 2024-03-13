@@ -6,7 +6,7 @@ def jeu():
     imageShop = pygame.transform.scale(consts.imageShop, (fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.60))
     imageShopGauche = pygame.transform.scale(consts.imageShop, (fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
     imagePlateau = pygame.transform.scale(consts.imagePlateau, (fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]*2-80,fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]*2-80))
-    imageBoutonCartes = pygame.transform.scale(consts.bouton_jouer_img,(imageShop.get_width()*0.6,imageShop.get_width()*0.3))
+    imageBoutonCartes = pygame.transform.scale(consts.imagePileCartes,(imageShop.get_width()*0.9/1.5,imageShop.get_width()*1.6/1.5))
 
     imgsPiecesB = [consts.imagePionB,consts.imageTourB,consts.imageFouB,consts.imageCavalierB,consts.imageReineB,consts.imageRoiB]
     imgsPiecesN = [consts.imagePionN,consts.imageTourN,consts.imageFouN,consts.imageCavalierN,consts.imageReineN,consts.imageRoiN]
