@@ -464,8 +464,6 @@ def jeu():
             self.surface.blit(self.image, self.rect)
 
         def verifier_clic(self, pos):
-            print(pos)
-            print(self.rect)
             if self.rect.collidepoint(pos):
                 return True
     
@@ -576,7 +574,7 @@ def jeu():
                                 carteActuelle = e
                                 carteActuelle.selectionnee = True
                 elif event.type == pygame.MOUSEMOTION:
-                    if carteActuelle:
+                    if carteActuelle != None:
                         if cartes != [] and carteActuelle.selectionnee:
                             newPos = pygame.mouse.get_pos()
                             carteActuelle.modifierPosition(newPos)
@@ -585,10 +583,10 @@ def jeu():
                         if cartes != [] and carteActuelle.selectionnee:
                             carteActuelle.selectionnee = False
                             carteActuelle.verifierAction(joueur,spritesEffetsGroup)
-                            if carteTest.jouee == True:
-                                cartes.remove(carteTest)
-                                cartesJouées.append(carteTest)
-                                del carteActuelle
+                            if carteActuelle.jouee == True:
+                                cartes.remove(carteActuelle)
+                                cartesJouées.append(carteActuelle)
+                                carteActuelle = None
             if mat == True:
                 garderOuvert = False
 
