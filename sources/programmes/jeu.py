@@ -467,19 +467,24 @@ def jeu():
             if self.rect.collidepoint(pos):
                 return True
     
-    def ajouterCarte(cartes,spritesCartesGroup):
+    def ajouterCarte(cartes,spritesCartesGroup,positionCartes):
         if len(cartes)<=2:
             carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
             cartes.append(carteTest)   
             carteTest.definirSprite()
             carteTest.affichage()
-            centrerCartes(cartes,spritesCartesGroup)
+            centrerCartes(cartes,spritesCartesGroup,positionCartes)
             
     
-    def centrerCartes(cartes,spritesCartesGroup,varitationCartesPositive = True, carteRetirée = None):
+    def centrerCartes(cartes,spritesCartesGroup,positionCartes,varitationCartesPositive = True, carteRetirée = None):
         if varitationCartesPositive:
+            print(f'initial : cartes : {(cartes)}    pos : {(positionCartes)}')
             for i in range(len(cartes)):
                 c = cartes[i]
+                if not c.position in positionCartes:
+                    positionCartes.append(c.position)
+                else:
+                    positionCartes.remove(c.position)
                 spritesCartesGroup.remove(c.sprite)
                 c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.imageInitiale.get_width()*0.90**(len(cartes)-1),c.sprite.imageInitiale.get_height()*0.90**(len(cartes)-1)))
                 if len(cartes) == 1:
@@ -495,24 +500,20 @@ def jeu():
                 c.sprite.rect = c.sprite.image.get_rect()
                 c.affichage()
         else:
+            print(' ')
             cartes.remove(carteRetirée)
             for i in range(len(cartes)):
-                print(carteRetirée)
-                print(cartes)
                 c = cartes[i]
-                spritesCartesGroup.remove(c.sprite)
-                c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.image.get_width()/0.90,c.sprite.image.get_height()/0.90))
-                if len(cartes)==0:
+                if c == carteRetirée:
                     pass
-                elif c == carteRetirée:
-                    pass
-                elif len(cartes)==2:
-                    print('test')
-                    if c in cartes[1:]:
-                        c.origin = c.origin[0] - (c.sprite.imageInitiale.get_width()*0.90**2)/2,c.origin[1]
-                c.position = c.origin
-                c.sprite.rect = c.sprite.image.get_rect()
-                c.affichage()
+                else:
+                    spritesCartesGroup.remove(c.sprite)
+                    c.sprite.image = pygame.transform.scale(c.sprite.image, (c.sprite.image.get_width()/0.90,c.sprite.image.get_height()/0.90))
+                    c.position = positionCartes[i]
+                    c.sprite.rect = c.sprite.image.get_rect()
+                    c.affichage()
+            positionCartes = []
+            
 
     def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
@@ -560,6 +561,7 @@ def jeu():
         spritesEffetsGroup = pygame.sprite.Group()
         cartes = []
         cartesJouées = []
+        positionCartes = []
         boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, 50, imageBoutonCartes, ajouterCarte)
         carteActuelle = None
         joueur = 'blanc'
@@ -591,7 +593,7 @@ def jeu():
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
-                            boutonCartes.action(cartes,spritesCartesGroup)
+                            boutonCartes.action(cartes,spritesCartesGroup,positionCartes)
                         for e in cartes:
                             if e.sprite.rect.collidepoint(pos):
                                 carteActuelle = e
@@ -608,7 +610,7 @@ def jeu():
                             carteActuelle.verifierAction(joueur,spritesEffetsGroup)
                             if carteActuelle.jouee == True:
                                 cartesJouées.append(carteActuelle)
-                                centrerCartes(cartes,spritesCartesGroup,False,carteActuelle)
+                                centrerCartes(cartes,spritesCartesGroup,positionCartes,False,carteActuelle)
                                 carteActuelle = None
             if mat == True:
                 garderOuvert = False
