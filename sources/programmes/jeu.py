@@ -53,6 +53,7 @@ def jeu():
                 self.couleur = couleur
                 self.sprite = None
                 self.moveable = True
+                self.durations = []
                 self.effets = []
                 self.effetsSprites = {}
 
@@ -87,10 +88,11 @@ def jeu():
             self.sprite.rect.topleft = (self.position[0],self.position[1])
             groupe.add(self.sprite)
 
-        def affichageEffet(self,effet,effetImg,group):
+        def affichageEffet(self,effet,effetImg = None,group = None):
             if effet in self.effets:
                 self.effets.remove(effet)
-                del self.effetsSprites[effet]
+                self.effetsSprites[effet].kill()
+                self.effetsSprites.pop(effet)
             else:
                 self.effets.append(effet)
                 self.effetsSprites[effet] = pygame.sprite.Sprite()
@@ -98,8 +100,14 @@ def jeu():
                 self.effetsSprites[effet].rect = self.effetsSprites[effet].image.get_rect()
                 self.effetsSprites[effet].rect.topright = self.sprite.rect.topright
                 group.add(self.effetsSprites[effet])
-                
-                
+
+        def inverseEffet(self,effet):
+            self.affichageEffet(effet)
+            for effectDuration in self.durations:
+                if effet in effectDuration:
+                    self.durations.remove(effectDuration)
+            if effet == 'gel':
+                self.moveable = True
 
     def centrer_piece(x,y,imagePiece):
             decalage_x = (fenetrePrincipale.get_size()[0] - (imagePlateau.get_width()/10*8)) / 2
@@ -110,6 +118,7 @@ def jeu():
         def __init__(self, x, y,couleur,aBougé = False):
             pièce.__init__(self,x,y,couleur)
             self.aBoujé = aBougé
+            self.valeur = 20
         
         def avoirType(self):
             return pion
@@ -143,6 +152,7 @@ def jeu():
     class tour(pièce): #pièce marchant, ne plus toucher sauf pour ajout
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
+            self.valeur = 50
         
         def symbole(self):
             if self.couleur == 'blanc':
@@ -191,6 +201,7 @@ def jeu():
     class fou(pièce): #pièce marchant, ne plus toucher sauf pour ajout
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
+            self.valeur = 35
         
         def symbole(self):
             if self.couleur == 'blanc':
@@ -240,6 +251,7 @@ def jeu():
     class cavalier(pièce): #pièce marchant, ne plus toucher sauf pour ajout
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
+            self.valeur = 35
         
         def symbole(self):
             if self.couleur == 'blanc':
@@ -262,6 +274,7 @@ def jeu():
     class reine(pièce): #pièce marchant, ne plus toucher sauf pour ajout
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
+            self.valeur = 80
 
         def symbole(self):
             if self.couleur == 'blanc':
@@ -434,18 +447,19 @@ def jeu():
                     self.position = newPos
                 self.affichage()
 
-            def verifierAction(self,joueur,groupeEffet):
+            def verifierAction(self,joueur,groupeEffet,tour):
                 case = plateau1.get_case(self.position[0]+self.sprite.image.get_width()/2,self.position[1]+self.sprite.image.get_height()/2)
                 if case[0]<0 or case[0]>7 or case[1]<0 or case[1]>7:
                     self.modifierPosition(self.origin, False)
                 else:
-                    self.action(case,joueur,groupeEffet)
+                    self.action(case,joueur,groupeEffet,tour)
 
-            def action(self,case,joueur,groupeEffet):
+            def action(self,case,joueur,groupeEffet,tour):
                 if plateau1.grille[int(case[1])][int(case[0])].estVide() == False and plateau1.get_object(int(case[1]),int(case[0])).couleur != joueur:
                     target = plateau1.get_object(int(case[1]),int(case[0]))
-                    if self.avoirType() == 'gel' or 'invocation':
+                    if self.avoirType() == 'gel':
                         target.moveable = False
+                        target.durations.append(('gel',tour+2))
                         target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
                         self.sprite.kill()
                         self.jouee = True
@@ -526,7 +540,7 @@ def jeu():
                 cartes.remove(carteRetirée)
             
 
-    def effectuerMouvement(piece,xDest,yDest,groupe, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
+    def effectuerMouvement(piece,xDest,yDest,groupe,monnaieBlanc,monnaieNoir, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
         try:
             assert plateau1.grille[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
@@ -548,6 +562,11 @@ def jeu():
                 if pieceMangée.avoirType() == roi:
                     mat = True
                     print(f'Partie terminée ! Les {joueur}s ont gagné !')
+                else:
+                    if joueur == 'blanc':
+                        monnaieBlanc += pieceMangée.valeur
+                    else:
+                        monnaieNoir += pieceMangée.valeur
                 
             except AssertionError as error:
                 print(error)
@@ -560,7 +579,7 @@ def jeu():
             #print(f'Coup précédent éffectué : {coupPrécédentEffectué}')
             if coupPrécédentEffectué == True :
                 joueur = "blanc" if joueur == "noir" else "noir"
-            return joueur,coupPrécédentEffectué,mat
+            return joueur,coupPrécédentEffectué,mat,monnaieBlanc,monnaieNoir
 
     def centrer(object):
         return fenetrePrincipale.get_size()[0]/2-object.get_size()[0]/2,fenetrePrincipale.get_size()[1]/2-object.get_size()[1]/2
@@ -574,13 +593,26 @@ def jeu():
         cartesJouées = []
         boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, 50, imageBoutonCartes, ajouterCarte)
         carteActuelle = None
+        tour = 1
         joueur = 'blanc'
+        monnaieBlanc,monnaieNoir = 0,0
         #print(f" \nC'est le tour des {joueur}s")
         for ligne in plateau1.grille:
             for piece in ligne:
                 if piece.contenu!=None:
                     piece.contenu.affichage(spritesPiecesGroupe)
+                    for effectDuration in piece.contenu.durations:
+                        if effectDuration[1] == tour:
+                            print('test')
+                            piece.inverseEffet(effectDuration[0])
         while garderOuvert == True:
+            for ligne in plateau1.grille:
+                for piece in ligne:
+                    if piece.contenu!=None:
+                        for effectDuration in piece.contenu.durations:
+                            if effectDuration[1] == tour:
+                                print('test')
+                                piece.contenu.inverseEffet(effectDuration[0])
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -596,10 +628,10 @@ def jeu():
                                     deuxiemeClic = True
                                     xDest,yDest = plateau1.get_case(int(pygame.mouse.get_pos()[0]),pygame.mouse.get_pos()[1])
                                     xDest,yDest = int(xDest),int(yDest)
-                            joueur,coupEffectué,mat = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,joueur,mat)
+                            joueur,coupEffectué,mat,monnaieBlanc,monnaieNoir = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,monnaieBlanc,monnaieNoir,joueur,mat)
                             if coupEffectué == True and mat == False:
-                                pass
-                                #print(f" \nC'est le tour des {joueur}s")
+                                tour += 0.5
+                                print(monnaieBlanc,monnaieNoir)
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
@@ -617,7 +649,7 @@ def jeu():
                     if carteActuelle:
                         if cartes != [] and carteActuelle.selectionnee:
                             carteActuelle.selectionnee = False
-                            carteActuelle.verifierAction(joueur,spritesEffetsGroup)
+                            carteActuelle.verifierAction(joueur,spritesEffetsGroup,tour)
                             if carteActuelle.jouee == True:
                                 cartesJouées.append(carteActuelle)
                                 centrerCartes(cartes,spritesCartesGroup,False,carteActuelle)
