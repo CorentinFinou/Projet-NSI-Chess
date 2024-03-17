@@ -31,3 +31,6 @@ bouton_quitter_img = pygame.image.load('../img/items/buttons/bouton_quitter.png'
 
 #effects
 effetGelImg = pygame.image.load('../img/effects/gel.png').convert_alpha()
+
+#police de caractères
+police = pygame.font.Font('../img/fonts/font.ttf', 40)

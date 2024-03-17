@@ -1,5 +1,5 @@
 import pygame,consts
-from random import randint
+from random import choices
 def jeu():
     pygame.init()
     fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
@@ -455,18 +455,22 @@ def jeu():
                 else:
                     self.action(case,joueur,groupeEffet,tour)
 
-            def action(self,case,joueur,groupeEffet,tour):
+            def action(self,case,joueur,groupeEffet,nbrTour):
                 if plateau1.grille[int(case[1])][int(case[0])].estVide() == False and plateau1.get_object(int(case[1]),int(case[0])).couleur != joueur:
                     target = plateau1.get_object(int(case[1]),int(case[0]))
                     if self.avoirType() == 'gel':
                         target.moveable = False
-                        target.durations.append(('gel',tour+2))
+                        target.durations.append(('gel',nbrTour+2))
                         target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
                         self.sprite.kill()
                         self.jouee = True
-                    
-                else:
-                    self.modifierPosition(self.origin, False)
+                elif plateau1.grille[int(case[1])][int(case[0])].estVide() == True:
+                    if self.avoirType() == 'invocation':
+                        target = plateau1.grille[int(case[1])][int(case[0])]
+                        target.modifContenu(choices([pion,cavalier,fou,tour,reine],[0.60,0.15,0.15,0.075,0.025])[0](case[0],case[1],joueur)) #([choix],[probas])
+                        self.sprite.kill()
+                        self.jouee = True
+                        
 
     class Bouton:
         def __init__(self, surface, x, y, image, action):
@@ -569,11 +573,8 @@ def jeu():
                         monnaieNoir += pieceMangée.valeur
                 
             except AssertionError as error:
-                print(error)
-                print(possibilités)
                 coupPrécédentEffectué = False
         except AssertionError as error:
-            print(error) 
             coupPrécédentEffectué = False
         finally:
             #print(f'Coup précédent éffectué : {coupPrécédentEffectué}')
@@ -589,30 +590,32 @@ def jeu():
         spritesPiecesGroupe = pygame.sprite.Group()
         spritesCartesGroup = pygame.sprite.Group()
         spritesEffetsGroup = pygame.sprite.Group()
+        spritesTextGroup = pygame.sprite.Group()
         cartes = []
         cartesJouées = []
-        boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, 50, imageBoutonCartes, ajouterCarte)
+        boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, imageShop.get_height()/15, imageBoutonCartes, ajouterCarte)
         carteActuelle = None
-        tour = 1
+        nbrTour = 1
         joueur = 'blanc'
         monnaieBlanc,monnaieNoir = 0,0
-        #print(f" \nC'est le tour des {joueur}s")
+        text = ''
+        imgText = consts.police.render(text,True,'white')
+        rectImgText = imgText.get_rect()
+        rectImgText.topleft = (imageShop.get_width()/2-rectImgText[2]/2, imageShop.get_height()-imageShop.get_height()/7.5)
         for ligne in plateau1.grille:
-            for piece in ligne:
-                if piece.contenu!=None:
-                    piece.contenu.affichage(spritesPiecesGroupe)
-                    for effectDuration in piece.contenu.durations:
-                        if effectDuration[1] == tour:
-                            print('test')
-                            piece.inverseEffet(effectDuration[0])
+            for case in ligne:
+                if case.contenu!=None:
+                    case.contenu.affichage(spritesPiecesGroupe)
         while garderOuvert == True:
             for ligne in plateau1.grille:
-                for piece in ligne:
-                    if piece.contenu!=None:
-                        for effectDuration in piece.contenu.durations:
-                            if effectDuration[1] == tour:
-                                print('test')
-                                piece.contenu.inverseEffet(effectDuration[0])
+                for case in ligne:
+                    if case.contenu:
+                        if not case.contenu.sprite:
+                            case.contenu.affichage(spritesPiecesGroupe)
+                        if case.contenu.durations != []:
+                            for effectDuration in case.contenu.durations:
+                                if effectDuration[1] == nbrTour:
+                                    case.contenu.inverseEffet(effectDuration[0])
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -630,12 +633,18 @@ def jeu():
                                     xDest,yDest = int(xDest),int(yDest)
                             joueur,coupEffectué,mat,monnaieBlanc,monnaieNoir = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,monnaieBlanc,monnaieNoir,joueur,mat)
                             if coupEffectué == True and mat == False:
-                                tour += 0.5
+                                nbrTour += 0.5
                                 print(monnaieBlanc,monnaieNoir)
+                                text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
+                                imgText = consts.render(text,True,'white')
+        
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
-                            boutonCartes.action(cartes,spritesCartesGroup)
+                            monnaieJoueur = (monnaieBlanc if joueur == 'blanc' else monnaieNoir)
+                            if monnaieJoueur>=30:
+                                boutonCartes.action(cartes,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
+                                monnaieJoueur -= 30
                         for e in cartes:
                             if e.sprite.rect.collidepoint(pos):
                                 carteActuelle = e
@@ -649,7 +658,7 @@ def jeu():
                     if carteActuelle:
                         if cartes != [] and carteActuelle.selectionnee:
                             carteActuelle.selectionnee = False
-                            carteActuelle.verifierAction(joueur,spritesEffetsGroup,tour)
+                            carteActuelle.verifierAction(joueur,spritesEffetsGroup,nbrTour)
                             if carteActuelle.jouee == True:
                                 cartesJouées.append(carteActuelle)
                                 centrerCartes(cartes,spritesCartesGroup,False,carteActuelle)
@@ -671,6 +680,8 @@ def jeu():
             spritesCartesGroup.update()
             spritesEffetsGroup.draw(fenetrePrincipale)
             spritesEffetsGroup.update()
+            spritesTextGroup.draw(imageShop)
+            spritesTextGroup.update()
             pygame.display.flip()
 
     plateau1 = plateau()
