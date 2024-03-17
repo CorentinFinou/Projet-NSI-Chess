@@ -48,6 +48,11 @@ def menu():
     def action_settings(self):
         nonlocal settingsVar
         settingsVar = True
+        
+    def quitter_settings(self):
+        print('test')
+        nonlocal settingsVar
+        settingsVar = False
 
     # Création des boutons
     bouton_jouer = Bouton(fenetre.get_width()/2-bouton_jouer_img.get_width()/2, fenetre.get_height()/2-bouton_jouer_img.get_height(), bouton_jouer_img, action_jouer)
@@ -75,7 +80,10 @@ def menu():
                         for bouton in boutons:
                             bouton.verifier_clic(pos)
             if settingsVar:
-                settings(fenetre,settingsVar) 
+                boutonsSettings = []
+                settings(fenetre,boutonsSettings,Bouton,quitter_settings)
+                for bouton in boutonsSettings:
+                    bouton.dessiner()
             else:
                 for bouton in boutons:
                     bouton.dessiner()
