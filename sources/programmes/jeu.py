@@ -1,4 +1,5 @@
 import pygame,consts
+from random import randint
 def jeu():
     pygame.init()
     fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
@@ -114,7 +115,7 @@ def jeu():
             decalage_y = (fenetrePrincipale.get_size()[1] - imagePlateau.get_height()/10*8) / 2
             return decalage_x + imagePiece.get_width()*x,decalage_y+imagePiece.get_height()*(y)
             
-    class pion(pièce): #ajouter mouvement diagonale lors de couleur différente
+    class pion(pièce): 
         def __init__(self, x, y,couleur,aBougé = False):
             pièce.__init__(self,x,y,couleur)
             self.aBoujé = aBougé
@@ -149,7 +150,7 @@ def jeu():
                         possibilités.append((yOr+1,xOr+i))
             return possibilités
 
-    class tour(pièce): #pièce marchant, ne plus toucher sauf pour ajout
+    class tour(pièce): 
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
             self.valeur = 50
@@ -198,7 +199,7 @@ def jeu():
                     break
             return possibilités
 
-    class fou(pièce): #pièce marchant, ne plus toucher sauf pour ajout
+    class fou(pièce): 
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
             self.valeur = 35
@@ -248,7 +249,7 @@ def jeu():
                     break
             return possibilités
 
-    class cavalier(pièce): #pièce marchant, ne plus toucher sauf pour ajout
+    class cavalier(pièce): 
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
             self.valeur = 35
@@ -271,7 +272,7 @@ def jeu():
                         possibilités.append((yOr+i[0],xOr+i[1]))
             return possibilités
 
-    class reine(pièce): #pièce marchant, ne plus toucher sauf pour ajout
+    class reine(pièce): 
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
             self.valeur = 80
@@ -352,7 +353,7 @@ def jeu():
                     break
             return possibilités
 
-    class roi(pièce): #pièce marchant, ne plus toucher sauf pour ajout
+    class roi(pièce): 
         def __init__(self, x, y,couleur):
             pièce.__init__(self,x,y,couleur)
 
@@ -463,6 +464,7 @@ def jeu():
                         target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
                         self.sprite.kill()
                         self.jouee = True
+                    
                 else:
                     self.modifierPosition(self.origin, False)
 
@@ -485,7 +487,7 @@ def jeu():
     def ajouterCarte(cartes,spritesCartesGroup,type = None):
         if len(cartes)<=2:
             if not type:
-                carteTest = carte(1,'gel'if len(cartes)%2==1 else 'invocation', spritesCartesGroup)
+                carteTest = carte(1,'gel', spritesCartesGroup)
             else:
                 carteTest = carte(1,type, spritesCartesGroup)
             cartes.append(carteTest)   
@@ -493,7 +495,6 @@ def jeu():
             carteTest.affichage()
             centrerCartes(cartes,spritesCartesGroup)
             
-    
     def centrerCartes(cartes,spritesCartesGroup,varitationCartesPositive = True, carteRetirée = None):
         if varitationCartesPositive:
             for i in range(len(cartes)):
@@ -539,7 +540,6 @@ def jeu():
                         c.affichage()
                 cartes.remove(carteRetirée)
             
-
     def effectuerMouvement(piece,xDest,yDest,groupe,monnaieBlanc,monnaieNoir, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
         try:
