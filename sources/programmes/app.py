@@ -3,10 +3,11 @@ from menu import menu
 from Sound import Sound
 #from musique import musique
 
-lancerAvecMenu = False #a modif si besoin
+lancerAvecMenu = True #a modif si besoin
 musique = False
+
 if lancerAvecMenu:
+    if musique :
+        Sound()    
     menu()
-if musique :
-    Sound()
 jeu()

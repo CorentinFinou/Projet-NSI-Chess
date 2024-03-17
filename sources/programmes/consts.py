@@ -25,9 +25,11 @@ imageRoiN = pygame.image.load("../img/items/pieces/roi_N.png").convert_alpha()
 imageCarteGel = pygame.image.load("../img/items/cards/gel_carte.png").convert_alpha()
 imageCarteInvocation = pygame.image.load("../img/items/cards/invocation_carte.png").convert_alpha()
 imagePileCartes = pygame.image.load("../img/items/cards/carte_pile.png").convert_alpha()
+
 #items/buttons
 bouton_jouer_img = pygame.image.load('../img/items/buttons/bouton_jouer.png').convert_alpha()
 bouton_quitter_img = pygame.image.load('../img/items/buttons/bouton_quitter.png').convert_alpha()
+bouton_settings_img = pygame.image.load('../img/items/buttons/bouton_settings.png').convert_alpha()
 
 #effects
 effetGelImg = pygame.image.load('../img/effects/gel.png').convert_alpha()
