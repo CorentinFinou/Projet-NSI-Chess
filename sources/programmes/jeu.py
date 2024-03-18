@@ -597,7 +597,7 @@ def jeu():
         carteActuelle = None
         nbrTour = 1
         joueur = 'blanc'
-        monnaieBlanc,monnaieNoir = 0,0
+        monnaieBlanc,monnaieNoir = 300,300
         text = ''
         imgText = consts.police.render(text,True,'white')
         rectImgText = imgText.get_rect()
@@ -636,7 +636,7 @@ def jeu():
                                 nbrTour += 0.5
                                 print(monnaieBlanc,monnaieNoir)
                                 text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
-                                imgText = consts.render(text,True,'white')
+                                imgText = consts.police.render(text,True,'white')
         
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
