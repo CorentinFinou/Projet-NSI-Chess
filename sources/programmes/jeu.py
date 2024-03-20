@@ -546,6 +546,7 @@ def jeu():
             
     def effectuerMouvement(piece,xDest,yDest,groupe,monnaieBlanc,monnaieNoir, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
+        xOr,yOr = int(xOr),int(yOr)
         try:
             assert plateau1.grille[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
             assert plateau1.grille[yOr][xOr].couleurContenuDifferentVerif(joueur) == False, "Vous ne pouvez pas jouer une pièce qui ne vous appartient pas"
@@ -593,7 +594,6 @@ def jeu():
         spritesPiecesGroupe = pygame.sprite.Group()
         spritesCartesGroup = pygame.sprite.Group()
         spritesEffetsGroup = pygame.sprite.Group()
-        spritesTextGroup = pygame.sprite.Group()
         cartesBlanches = []
         cartesNoires = []
         cartesJouées = []
@@ -601,11 +601,13 @@ def jeu():
         carteActuelle = None
         nbrTour = 1
         joueur = 'blanc'
-        monnaieBlanc,monnaieNoir = 300,300
-        text = ''
-        imgText = consts.police.render(text,True,'white')
+        monnaieBlanc,monnaieNoir = 100,100
+        imgText = consts.police.render('0',True,'white')
         rectImgText = imgText.get_rect()
-        rectImgText.topleft = (imageShop.get_width()/2-rectImgText[2]/2, imageShop.get_height()-imageShop.get_height()/7.5)
+        imgTextConst = consts.police.render('Monnaie du joueur : ',True,'white')
+        rectImgTextConst = imgTextConst.get_rect()
+        rectImgText.topleft = (imageShop.get_width()/2-(rectImgText[2]-rectImgTextConst[2])/2, imageShop.get_height()-imageShop.get_height()/7.5)
+        rectImgTextConst.topright = rectImgText.topleft
         for ligne in plateau1.grille:
             for case in ligne:
                 if case.contenu!=None:
@@ -650,16 +652,27 @@ def jeu():
                             joueur,coupEffectué,mat,monnaieBlanc,monnaieNoir = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,monnaieBlanc,monnaieNoir,joueur,mat)
                             if coupEffectué == True and mat == False:
                                 nbrTour += 0.5
-                                print(monnaieBlanc,monnaieNoir)
                                 text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
-                                imgText = consts.police.render(text,True,'white')
+                                newImgText = consts.police.render(text,True,'white')
+                                if newImgText.get_rect()[2] > imgText.get_rect()[2]:
+                                    rectImgText = newImgText.get_rect()
+                                else:
+                                    rectImgText = imgText.get_rect()
+                                imgText = newImgText
+                                rectImgText.topleft = (imageShop.get_width()/2-(rectImgText[2]-rectImgTextConst[2])/2, imageShop.get_height()-imageShop.get_height()/7.5)
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
-                            monnaieJoueur = (monnaieBlanc if joueur == 'blanc' else monnaieNoir)
-                            if monnaieJoueur>=30:
+                            if joueur == 'blanc' and monnaieBlanc>=30:
                                 boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
-                                monnaieJoueur -= 30
+                                monnaieBlanc -= 30
+                            elif joueur == 'noir' and monnaieNoir>=30:
+                                boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
+                                monnaieNoir -= 30 
+                            text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
+                            newImgText = consts.police.render(text,True,'white')
+                            imgText = newImgText
+                            rectImgText.topleft = (imageShop.get_width()/2-(rectImgText[2]-rectImgTextConst[2])/2, imageShop.get_height()-imageShop.get_height()/7.5)
                             if carteActuelle:
                                 carteActuelle.modifierPosition('not valid', False)
                                 carteActuelle.selectionnee = False
@@ -697,6 +710,9 @@ def jeu():
             #objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
             fenetrePrincipale.blit(imageShopGauche, (imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2))
             boutonCartes.dessiner()
+            pygame.draw.rect(imageShop,(73,48,43),rectImgText)
+            imageShop.blit(imgText,rectImgText)
+            imageShop.blit(imgTextConst,rectImgTextConst)
             #Placement des images des pièces
             spritesPiecesGroupe.draw(fenetrePrincipale)
             spritesPiecesGroupe.update()
@@ -704,8 +720,6 @@ def jeu():
             spritesCartesGroup.update()
             spritesEffetsGroup.draw(fenetrePrincipale)
             spritesEffetsGroup.update()
-            spritesTextGroup.draw(imageShop)
-            spritesTextGroup.update()
             pygame.display.flip()
 
     plateau1 = plateau()
