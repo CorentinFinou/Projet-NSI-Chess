@@ -591,7 +591,8 @@ def jeu():
         spritesCartesGroup = pygame.sprite.Group()
         spritesEffetsGroup = pygame.sprite.Group()
         spritesTextGroup = pygame.sprite.Group()
-        cartes = []
+        cartesBlanches = []
+        cartesNoires = []
         cartesJouées = []
         boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, imageShop.get_height()/15, imageBoutonCartes, ajouterCarte)
         carteActuelle = None
@@ -607,6 +608,18 @@ def jeu():
                 if case.contenu!=None:
                     case.contenu.affichage(spritesPiecesGroupe)
         while garderOuvert == True:
+            if joueur == 'blanc':
+                for carteN in cartesNoires:
+                    spritesCartesGroup.remove(carteN.sprite)
+                if cartesBlanches != []:
+                    for carteB in cartesBlanches:
+                        spritesCartesGroup.add(carteB.sprite)
+            else:
+                for carteB in cartesBlanches:
+                    spritesCartesGroup.remove(carteB.sprite)
+                if cartesNoires != []:
+                    for carteN in cartesNoires:                
+                        spritesCartesGroup.add(carteN.sprite)
             for ligne in plateau1.grille:
                 for case in ligne:
                     if case.contenu:
@@ -637,34 +650,42 @@ def jeu():
                                 print(monnaieBlanc,monnaieNoir)
                                 text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
                                 imgText = consts.police.render(text,True,'white')
-        
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
                             monnaieJoueur = (monnaieBlanc if joueur == 'blanc' else monnaieNoir)
                             if monnaieJoueur>=30:
-                                boutonCartes.action(cartes,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
+                                boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
                                 monnaieJoueur -= 30
-                        for e in cartes:
+                            if carteActuelle:
+                                carteActuelle.modifierPosition('not valid', False)
+                                carteActuelle.selectionnee = False
+                                carteActuelle = None
+                        for e in (cartesBlanches if joueur == 'blanc' else cartesNoires):
                             if e.sprite.rect.collidepoint(pos):
                                 carteActuelle = e
                                 carteActuelle.selectionnee = True
                 elif event.type == pygame.MOUSEMOTION:
                     if carteActuelle != None:
-                        if cartes != [] and carteActuelle.selectionnee:
+                        if cartesBlanches if joueur == 'blanc' else cartesNoires != [] and carteActuelle.selectionnee:
                             newPos = pygame.mouse.get_pos()
                             carteActuelle.modifierPosition(newPos)
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if carteActuelle:
-                        if cartes != [] and carteActuelle.selectionnee:
+                        if cartesBlanches if joueur == 'blanc' else cartesNoires != [] and carteActuelle.selectionnee:
                             carteActuelle.selectionnee = False
                             carteActuelle.verifierAction(joueur,spritesEffetsGroup,nbrTour)
                             if carteActuelle.jouee == True:
                                 cartesJouées.append(carteActuelle)
-                                centrerCartes(cartes,spritesCartesGroup,False,carteActuelle)
+                                centrerCartes(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,False,carteActuelle)
+                                carteActuelle = None
+                            else:
+                                carteActuelle.modifierPosition(carteActuelle.origin,False)
+                                carteActuelle.selectionnee = False
                                 carteActuelle = None
             if mat == True:
                 garderOuvert = False
+
 
             #Placement des images de fond
             fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
