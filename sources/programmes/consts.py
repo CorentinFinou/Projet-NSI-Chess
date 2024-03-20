@@ -31,6 +31,7 @@ bouton_jouer_img = pygame.image.load('../img/items/buttons/bouton_jouer.png').co
 bouton_quitter_img = pygame.image.load('../img/items/buttons/bouton_quitter.png').convert_alpha()
 bouton_settings_img = pygame.image.load('../img/items/buttons/bouton_settings.png').convert_alpha()
 bouton_retour_img = pygame.image.load('../img/items/buttons/bouton_retour.png').convert_alpha()
+bouton_musique_img = pygame.image.load('../img/items/buttons/bouton_musique.png').convert_alpha()
 
 #effects
 effetGelImg = pygame.image.load('../img/effects/gel.png').convert_alpha()

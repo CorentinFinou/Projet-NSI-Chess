@@ -1,6 +1,5 @@
 import pygame
 from settings import settings
-
 def menu():
     #import images avec noms correspondant aux noms donnés par paul aux variables du programme
     from consts import imageFondForet as fond_menu, bouton_jouer_img,bouton_quitter_img, bouton_settings_img
@@ -23,12 +22,13 @@ def menu():
 
     # Classe pour les boutons
     class Bouton:
-        def __init__(self, x, y, image, action):
+        def __init__(self, x, y, image, action,param = None):
             self.rect = image.get_rect()
             self.rect.topleft = (x, y)
             self.image = image
             self.action = action
             self.state = False
+            self.param = param
 
         def dessiner(self):
             fenetre.blit(self.image, self.rect)
@@ -41,28 +41,23 @@ def menu():
     def action_jouer(self):
         self.state = True
 
-    def action_quitter(self):
+    def action_quitter():
         pygame.quit()
         quit()
     
-    def action_settings(self):
-        nonlocal settingsVar
-        settingsVar = True
-        
-    def quitter_settings(self):
-        print('test')
-        nonlocal settingsVar
-        settingsVar = False
-
+    def settingsVarClutch(e):
+        global settingsVar
+        print(settingsVar)
+        settingsVar = False if settingsVar else True
     # Création des boutons
     bouton_jouer = Bouton(fenetre.get_width()/2-bouton_jouer_img.get_width()/2, fenetre.get_height()/2-bouton_jouer_img.get_height(), bouton_jouer_img, action_jouer)
     bouton_quitter = Bouton(fenetre.get_width()/2-bouton_quitter_img.get_width()/2, fenetre.get_height()/2, bouton_quitter_img, action_quitter)
-    bouton_settings =  Bouton(fenetre.get_width()/2-bouton_settings_img.get_width()/2, fenetre.get_height()/2+bouton_settings_img.get_height(), bouton_settings_img, action_settings)
+    settingsVar = False
+    bouton_settings =  Bouton(fenetre.get_width()/2-bouton_settings_img.get_width()/2, fenetre.get_height()/2+bouton_settings_img.get_height(), bouton_settings_img,settingsVarClutch)
     boutons = [bouton_jouer, bouton_quitter,bouton_settings]
 
     
     # Boucle principale
-    settingsVar = False
     def lancer():
         en_cours = True
         while en_cours:
@@ -81,7 +76,7 @@ def menu():
                             bouton.verifier_clic(pos)
             if settingsVar:
                 boutonsSettings = []
-                settings(fenetre,boutonsSettings,Bouton,quitter_settings)
+                settings(fenetre,Bouton,boutons,settingsVar)
                 for bouton in boutonsSettings:
                     bouton.dessiner()
             else:
