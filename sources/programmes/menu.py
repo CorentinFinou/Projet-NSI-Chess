@@ -16,8 +16,7 @@ def menu():
     bouton_jouer_img = pygame.transform.scale(bouton_jouer_img, (300, 150))
     bouton_quitter_img = pygame.transform.scale(bouton_quitter_img, (300, 150))
 
-    # Police de caractères
-    police = pygame.font.Font(None, 40)
+
 
     # Classe pour les boutons
     class Bouton:

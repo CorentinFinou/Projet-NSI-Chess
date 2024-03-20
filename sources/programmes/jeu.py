@@ -1,5 +1,5 @@
 import pygame,consts
-from random import randint
+from random import choices
 def jeu():
     pygame.init()
     fenetrePrincipale = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
@@ -455,18 +455,22 @@ def jeu():
                 else:
                     self.action(case,joueur,groupeEffet,tour)
 
-            def action(self,case,joueur,groupeEffet,tour):
+            def action(self,case,joueur,groupeEffet,nbrTour):
                 if plateau1.grille[int(case[1])][int(case[0])].estVide() == False and plateau1.get_object(int(case[1]),int(case[0])).couleur != joueur:
                     target = plateau1.get_object(int(case[1]),int(case[0]))
                     if self.avoirType() == 'gel':
                         target.moveable = False
-                        target.durations.append(('gel',tour+2))
+                        target.durations.append(('gel',nbrTour+2))
                         target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
                         self.sprite.kill()
                         self.jouee = True
-                    
-                else:
-                    self.modifierPosition(self.origin, False)
+                elif plateau1.grille[int(case[1])][int(case[0])].estVide() == True:
+                    if self.avoirType() == 'invocation':
+                        target = plateau1.grille[int(case[1])][int(case[0])]
+                        target.modifContenu(choices([pion,cavalier,fou,tour,reine],[0.60,0.15,0.15,0.075,0.025])[0](case[0],case[1],joueur)) #([choix],[probas])
+                        self.sprite.kill()
+                        self.jouee = True
+                        
 
     class Bouton:
         def __init__(self, surface, x, y, image, action):
@@ -542,6 +546,7 @@ def jeu():
             
     def effectuerMouvement(piece,xDest,yDest,groupe,monnaieBlanc,monnaieNoir, joueur = 'blanc',mat = False, coupPrécédentEffectué = True):
         xOr,yOr = piece.avoirPosition()
+        xOr,yOr = int(xOr),int(yOr)
         try:
             assert plateau1.grille[yOr][xOr].estVide() == False, "Il n'y a pas de pièce sur cette case"
             assert plateau1.grille[yOr][xOr].couleurContenuDifferentVerif(joueur) == False, "Vous ne pouvez pas jouer une pièce qui ne vous appartient pas"
@@ -567,13 +572,13 @@ def jeu():
                         monnaieBlanc += pieceMangée.valeur
                     else:
                         monnaieNoir += pieceMangée.valeur
-                
+                if pieceMangée.effets != []:
+                    for effet in pieceMangée.effets:
+                        pieceMangée.affichageEffet(effet)
+
             except AssertionError as error:
-                print(error)
-                print(possibilités)
                 coupPrécédentEffectué = False
         except AssertionError as error:
-            print(error) 
             coupPrécédentEffectué = False
         finally:
             #print(f'Coup précédent éffectué : {coupPrécédentEffectué}')
@@ -589,30 +594,46 @@ def jeu():
         spritesPiecesGroupe = pygame.sprite.Group()
         spritesCartesGroup = pygame.sprite.Group()
         spritesEffetsGroup = pygame.sprite.Group()
-        cartes = []
+        cartesBlanches = []
+        cartesNoires = []
         cartesJouées = []
-        boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, 50, imageBoutonCartes, ajouterCarte)
+        boutonCartes = Bouton(imageShop, imageShop.get_width()/2-imageBoutonCartes.get_width()/2, imageShop.get_height()/15, imageBoutonCartes, ajouterCarte)
         carteActuelle = None
-        tour = 1
+        nbrTour = 1
         joueur = 'blanc'
-        monnaieBlanc,monnaieNoir = 0,0
-        #print(f" \nC'est le tour des {joueur}s")
+        monnaieBlanc,monnaieNoir = 100,100
+        imgText = consts.police.render('0',True,'white')
+        rectImgText = imgText.get_rect()
+        imgTextConst = consts.police.render('Monnaie du joueur : ',True,'white')
+        rectImgTextConst = imgTextConst.get_rect()
+        rectImgText.topleft = (imageShop.get_width()/2-(rectImgText[2]-rectImgTextConst[2])/2, imageShop.get_height()-imageShop.get_height()/7.5)
+        rectImgTextConst.topright = rectImgText.topleft
         for ligne in plateau1.grille:
-            for piece in ligne:
-                if piece.contenu!=None:
-                    piece.contenu.affichage(spritesPiecesGroupe)
-                    for effectDuration in piece.contenu.durations:
-                        if effectDuration[1] == tour:
-                            print('test')
-                            piece.inverseEffet(effectDuration[0])
+            for case in ligne:
+                if case.contenu!=None:
+                    case.contenu.affichage(spritesPiecesGroupe)
         while garderOuvert == True:
+            if joueur == 'blanc':
+                for carteN in cartesNoires:
+                    spritesCartesGroup.remove(carteN.sprite)
+                if cartesBlanches != []:
+                    for carteB in cartesBlanches:
+                        spritesCartesGroup.add(carteB.sprite)
+            else:
+                for carteB in cartesBlanches:
+                    spritesCartesGroup.remove(carteB.sprite)
+                if cartesNoires != []:
+                    for carteN in cartesNoires:                
+                        spritesCartesGroup.add(carteN.sprite)
             for ligne in plateau1.grille:
-                for piece in ligne:
-                    if piece.contenu!=None:
-                        for effectDuration in piece.contenu.durations:
-                            if effectDuration[1] == tour:
-                                print('test')
-                                piece.contenu.inverseEffet(effectDuration[0])
+                for case in ligne:
+                    if case.contenu:
+                        if not case.contenu.sprite:
+                            case.contenu.affichage(spritesPiecesGroupe)
+                        if case.contenu.durations != []:
+                            for effectDuration in case.contenu.durations:
+                                if effectDuration[1] == nbrTour:
+                                    case.contenu.inverseEffet(effectDuration[0])
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
@@ -630,32 +651,57 @@ def jeu():
                                     xDest,yDest = int(xDest),int(yDest)
                             joueur,coupEffectué,mat,monnaieBlanc,monnaieNoir = effectuerMouvement(pieceABouger,xDest,yDest,spritesPiecesGroupe,monnaieBlanc,monnaieNoir,joueur,mat)
                             if coupEffectué == True and mat == False:
-                                tour += 0.5
-                                print(monnaieBlanc,monnaieNoir)
+                                nbrTour += 0.5
+                                text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
+                                newImgText = consts.police.render(text,True,'white')
+                                if newImgText.get_rect()[2] > imgText.get_rect()[2]:
+                                    rectImgText = newImgText.get_rect()
+                                else:
+                                    rectImgText = imgText.get_rect()
+                                imgText = newImgText
+                                rectImgText.topleft = (imageShop.get_width()/2-(rectImgText[2]-rectImgTextConst[2])/2, imageShop.get_height()-imageShop.get_height()/7.5)
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
-                            boutonCartes.action(cartes,spritesCartesGroup)
-                        for e in cartes:
+                            if joueur == 'blanc' and monnaieBlanc>=30:
+                                boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
+                                monnaieBlanc -= 30
+                            elif joueur == 'noir' and monnaieNoir>=30:
+                                boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
+                                monnaieNoir -= 30 
+                            text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
+                            newImgText = consts.police.render(text,True,'white')
+                            imgText = newImgText
+                            rectImgText.topleft = (imageShop.get_width()/2-(rectImgText[2]-rectImgTextConst[2])/2, imageShop.get_height()-imageShop.get_height()/7.5)
+                            if carteActuelle:
+                                carteActuelle.modifierPosition('not valid', False)
+                                carteActuelle.selectionnee = False
+                                carteActuelle = None
+                        for e in (cartesBlanches if joueur == 'blanc' else cartesNoires):
                             if e.sprite.rect.collidepoint(pos):
                                 carteActuelle = e
                                 carteActuelle.selectionnee = True
                 elif event.type == pygame.MOUSEMOTION:
                     if carteActuelle != None:
-                        if cartes != [] and carteActuelle.selectionnee:
+                        if cartesBlanches if joueur == 'blanc' else cartesNoires != [] and carteActuelle.selectionnee:
                             newPos = pygame.mouse.get_pos()
                             carteActuelle.modifierPosition(newPos)
                 elif event.type == pygame.MOUSEBUTTONUP:
                     if carteActuelle:
-                        if cartes != [] and carteActuelle.selectionnee:
+                        if cartesBlanches if joueur == 'blanc' else cartesNoires != [] and carteActuelle.selectionnee:
                             carteActuelle.selectionnee = False
-                            carteActuelle.verifierAction(joueur,spritesEffetsGroup,tour)
+                            carteActuelle.verifierAction(joueur,spritesEffetsGroup,nbrTour)
                             if carteActuelle.jouee == True:
                                 cartesJouées.append(carteActuelle)
-                                centrerCartes(cartes,spritesCartesGroup,False,carteActuelle)
+                                centrerCartes(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,False,carteActuelle)
+                                carteActuelle = None
+                            else:
+                                carteActuelle.modifierPosition(carteActuelle.origin,False)
+                                carteActuelle.selectionnee = False
                                 carteActuelle = None
             if mat == True:
                 garderOuvert = False
+
 
             #Placement des images de fond
             fenetrePrincipale.blit(imageFondForet, centrer(imageFondForet))
@@ -664,6 +710,9 @@ def jeu():
             #objetFutur = pygame.draw.rect(imageFondForet, "black",(imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2,fenetrePrincipale.get_size()[0]/4, fenetrePrincipale.get_size()[1]*0.90))
             fenetrePrincipale.blit(imageShopGauche, (imageShop.get_size()[0]+20-fenetrePrincipale.get_size()[0]/4,(fenetrePrincipale.get_size()[1]*0.10)//2))
             boutonCartes.dessiner()
+            pygame.draw.rect(imageShop,(73,48,43),rectImgText)
+            imageShop.blit(imgText,rectImgText)
+            imageShop.blit(imgTextConst,rectImgTextConst)
             #Placement des images des pièces
             spritesPiecesGroupe.draw(fenetrePrincipale)
             spritesPiecesGroupe.update()
