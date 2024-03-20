@@ -571,7 +571,10 @@ def jeu():
                         monnaieBlanc += pieceMangée.valeur
                     else:
                         monnaieNoir += pieceMangée.valeur
-                
+                if pieceMangée.effets != []:
+                    for effet in pieceMangée.effets:
+                        pieceMangée.affichageEffet(effet)
+
             except AssertionError as error:
                 coupPrécédentEffectué = False
         except AssertionError as error:
