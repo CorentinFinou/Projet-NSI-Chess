@@ -4,7 +4,7 @@ from Sound import Sound
 #from musique import musique
 
 lancerAvecMenu = True #a modif si besoin
-musique = False
+musique = True
 
 if lancerAvecMenu:
     if musique :
