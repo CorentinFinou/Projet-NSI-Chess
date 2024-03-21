@@ -460,7 +460,7 @@ def jeu():
                     target = plateau1.get_object(int(case[1]),int(case[0]))
                     if self.avoirType() == 'gel':
                         target.moveable = False
-                        target.durations.append(('gel',nbrTour+2))
+                        target.durations.append(('gel',nbrTour+1))
                         target.affichageEffet('gel',consts.effetGelImg,groupeEffet)
                         self.sprite.kill()
                         self.jouee = True
@@ -601,7 +601,7 @@ def jeu():
         carteActuelle = None
         nbrTour = 1
         joueur = 'blanc'
-        monnaieBlanc,monnaieNoir = 100,100
+        monnaieBlanc,monnaieNoir = 0,0
         imgText = consts.police.render('0',True,'white')
         rectImgText = imgText.get_rect()
         imgTextConst = consts.police.render('Monnaie du joueur : ',True,'white')
@@ -663,12 +663,12 @@ def jeu():
                     if event.button == 1 :
                         pos = pygame.mouse.get_pos()
                         if boutonCartes.verifier_clic((pos[0]-((fenetrePrincipale.get_size()[0]-imageShop.get_size()[0]-20)),pos[1]-((fenetrePrincipale.get_size()[1]*0.10)//2))) == True:
-                            if joueur == 'blanc' and monnaieBlanc>=30:
+                            if joueur == 'blanc' and monnaieBlanc>=50:
                                 boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
-                                monnaieBlanc -= 30
-                            elif joueur == 'noir' and monnaieNoir>=30:
+                                monnaieBlanc -= 50
+                            elif joueur == 'noir' and monnaieNoir>=50:
                                 boutonCartes.action(cartesBlanches if joueur == 'blanc' else cartesNoires,spritesCartesGroup,choices(['gel','invocation'],[0.5,0.5])[0])
-                                monnaieNoir -= 30 
+                                monnaieNoir -= 50
                             text = str(monnaieBlanc if joueur == 'blanc' else monnaieNoir)
                             newImgText = consts.police.render(text,True,'white')
                             imgText = newImgText
