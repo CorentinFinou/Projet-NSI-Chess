@@ -4,9 +4,9 @@ from Sound import Sound
 #from musique import musique
 
 lancerAvecMenu = True #a modif si besoin
-musique = False
-if lancerAvecMenu:
-    menu()
+musique = True
 if musique :
     Sound()
+if lancerAvecMenu:
+    menu()
 jeu()

@@ -13,8 +13,8 @@ def menu():
 
     # Redimensionnement des images
     fond_menu = pygame.transform.scale(fond_menu, fenetre.get_size())
-    bouton_jouer_img = pygame.transform.scale(bouton_jouer_img, (fenetre.get_width()/4, fenetre.get_height()/4))
-    bouton_quitter_img = pygame.transform.scale(bouton_quitter_img, (fenetre.get_width()/4, fenetre.get_height()/4))
+    bouton_jouer_img = pygame.transform.scale(bouton_jouer_img, (fenetre.get_width()/4, fenetre.get_width()/4/2))
+    bouton_quitter_img = pygame.transform.scale(bouton_quitter_img, (fenetre.get_width()/4, fenetre.get_width()/4/2))
 
 
 
