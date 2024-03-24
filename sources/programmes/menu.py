@@ -1,8 +1,8 @@
 import pygame
 from settings import settings
-def menu():
+def menu(musique):
     #import images avec noms correspondant aux noms donnés par paul aux variables du programme
-    from consts import imageFondForet as fond_menu, bouton_jouer_img,bouton_quitter_img, bouton_settings_img
+    from consts import imageFondForet as fond_menu, bouton_jouer_img,bouton_quitter_img, bouton_settings_img,bouton_musique_img
 
     # Initialisation de Pygame
     pygame.init()
@@ -35,30 +35,38 @@ def menu():
 
         def verifier_clic(self, pos):
             if self.rect.collidepoint(pos):
-                self.action(self)
+                if self.param != None:
+                    self.param = self.action(self,self.param)
+                    return self.param
+                else:
+                    self.action(self)
 
     # Fonctions pour les actions des boutons
     def action_jouer(self):
         self.state = True
 
-    def action_quitter():
+    def action_quitter(self):
         pygame.quit()
         quit()
-    
-    def settingsVarClutch(e):
-        global settingsVar
-        print(settingsVar)
-        settingsVar = False if settingsVar else True
+
+    def settingsOpen(self):
+        nonlocal settingsOpened
+        if settingsOpened:
+            settingsOpened = False
+        else:
+            settingsOpened = True
     # Création des boutons
     bouton_jouer = Bouton(fenetre.get_width()/2-bouton_jouer_img.get_width()/2, fenetre.get_height()/2-bouton_jouer_img.get_height(), bouton_jouer_img, action_jouer)
     bouton_quitter = Bouton(fenetre.get_width()/2-bouton_quitter_img.get_width()/2, fenetre.get_height()/2, bouton_quitter_img, action_quitter)
-    settingsVar = False
-    bouton_settings =  Bouton(fenetre.get_width()/2-bouton_settings_img.get_width()/2, fenetre.get_height()/2+bouton_settings_img.get_height(), bouton_settings_img,settingsVarClutch)
+    bouton_settings =  Bouton(fenetre.get_width()/2-bouton_settings_img.get_width()/2, fenetre.get_height()/2+bouton_settings_img.get_height(), bouton_settings_img,settingsOpen)
     boutons = [bouton_jouer, bouton_quitter,bouton_settings]
+    boutonsSettings = []
 
     
+    settingsOpened = False
     # Boucle principale
-    def lancer():
+    def lancer(musique):
+        nonlocal settingsOpened
         en_cours = True
         while en_cours:
             en_cours = True if bouton_jouer.state == False else False
@@ -68,19 +76,31 @@ def menu():
                     en_cours = False
                 if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
-                            en_cours = False   
+                            action_quitter('self')
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         pos = pygame.mouse.get_pos()
-                        for bouton in boutons:
-                            bouton.verifier_clic(pos)
-            if settingsVar:
-                boutonsSettings = []
-                settings(fenetre,Bouton,boutons,settingsVar)
+                        if not settingsOpened:
+                            for bouton in boutons:
+                                bouton.verifier_clic(pos)
+                        else:
+                            for bouton in boutonsSettings:
+                                print(bouton.image,bouton_musique_img)
+                                if bouton.image == bouton_musique_img:
+                                    print('verif bouton musique')
+                                    musique = bouton.verifier_clic(pos)
+                                else:
+                                    print('verif bouton quitter')
+                                    bouton.verifier_clic(pos)
+            #print(musique)
+            if settingsOpened:
+                settings(fenetre,Bouton,boutonsSettings,settingsOpen,musique)
                 for bouton in boutonsSettings:
                     bouton.dessiner()
             else:
                 for bouton in boutons:
                     bouton.dessiner()
             pygame.display.flip()
-    lancer()
+        print(musique)
+        return musique
+    lancer(musique)
