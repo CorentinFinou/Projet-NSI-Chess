@@ -43,8 +43,8 @@ def menu():
         quit()
 
     # Création des boutons
-    bouton_jouer = Bouton(fenetre.get_width()/4+bouton_jouer_img.get_width()/2, fenetre.get_height()/4-bouton_jouer_img.get_height()/2, bouton_jouer_img, action_jouer)
-    bouton_quitter = Bouton(fenetre.get_width()/4+bouton_quitter_img.get_width()/2, fenetre.get_height()/4+bouton_quitter_img.get_height()/2, bouton_quitter_img, action_quitter)
+    bouton_jouer = Bouton(fenetre.get_width()/2-bouton_jouer_img.get_width()/2, fenetre.get_height()/2-bouton_jouer_img.get_height(), bouton_jouer_img, action_jouer)
+    bouton_quitter = Bouton(fenetre.get_width()/2-bouton_quitter_img.get_width()/2, fenetre.get_height()/2, bouton_quitter_img, action_quitter)
     boutons = [bouton_jouer, bouton_quitter]
 
     # Boucle principale
