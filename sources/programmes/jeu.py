@@ -601,7 +601,7 @@ def jeu():
         carteActuelle = None
         nbrTour = 1
         joueur = 'blanc'
-        monnaieBlanc,monnaieNoir = 100,100
+        monnaieBlanc,monnaieNoir = 0,0
         imgText = consts.police.render('0',True,'white')
         rectImgText = imgText.get_rect()
         imgTextConst = consts.police.render('Monnaie du joueur : ',True,'white')
