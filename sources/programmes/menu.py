@@ -13,8 +13,8 @@ def menu():
 
     # Redimensionnement des images
     fond_menu = pygame.transform.scale(fond_menu, fenetre.get_size())
-    bouton_jouer_img = pygame.transform.scale(bouton_jouer_img, (300, 150))
-    bouton_quitter_img = pygame.transform.scale(bouton_quitter_img, (300, 150))
+    bouton_jouer_img = pygame.transform.scale(bouton_jouer_img, (fenetre.get_width()/4, fenetre.get_height()/4))
+    bouton_quitter_img = pygame.transform.scale(bouton_quitter_img, (fenetre.get_width()/4, fenetre.get_height()/4))
 
 
 
@@ -43,8 +43,8 @@ def menu():
         quit()
 
     # Création des boutons
-    bouton_jouer = Bouton(550, 300, bouton_jouer_img, action_jouer)
-    bouton_quitter = Bouton(550, 400, bouton_quitter_img, action_quitter)
+    bouton_jouer = Bouton(fenetre.get_width()/4+bouton_jouer_img.get_width()/2, fenetre.get_height()/4-bouton_jouer_img.get_height()/2, bouton_jouer_img, action_jouer)
+    bouton_quitter = Bouton(fenetre.get_width()/4+bouton_quitter_img.get_width()/2, fenetre.get_height()/4+bouton_quitter_img.get_height()/2, bouton_quitter_img, action_quitter)
     boutons = [bouton_jouer, bouton_quitter]
 
     # Boucle principale
